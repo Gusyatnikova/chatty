@@ -1,0 +1,11 @@
+http:
+  port: "8888"
+  host: "localhost"
+
+logger:
+  log_level: "debug"
+
+postgres:
+  pool_max: 5
+  host: "localhost"
+  port: 5442
