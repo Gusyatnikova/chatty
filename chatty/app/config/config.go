@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/spf13/viper"
 )
 
 type (
@@ -19,7 +18,7 @@ type (
 	}
 
 	Log struct {
-		Level string `env-required:"true" yaml:"log_level"`
+		Level string `env-required:"true" env:"LOG_LEVEL"`
 	}
 
 	PG struct {
@@ -32,21 +31,10 @@ type (
 	}
 )
 
-//see viper?
 func NewConfig() (*Config, error) {
-	//viper.SetConfigName("app")
-	//viper.SetConfigType("env")
-
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, fmt.Errorf("err in config.NewConfing.ReadInConfig(): %w", err)
-	}
-
 	cfg := &Config{}
 
-	err = cleanenv.ReadEnv(cfg)
+	err := cleanenv.ReadEnv(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("err in config.NewConfing.ReadEnv(): %w", err)
 	}
