@@ -1,0 +1,106 @@
+definitions:
+  LoginRequestBody:
+    properties:
+      login:
+        example: testUser123
+        type: string
+      password:
+        example: q123!@#Q
+        type: string
+    type: object
+  RegisterRequestBody:
+    properties:
+      email:
+        example: example@gmail.com
+        type: string
+      login:
+        example: testUser123
+        type: string
+      password:
+        example: q123!@#Q
+        type: string
+      phone_number:
+        example: "+71234567890"
+        type: string
+    type: object
+  RegisterResponseBody:
+    properties:
+      email:
+        example: example@gmail.com
+        type: string
+      id:
+        example: 018496f4-77d7-0ef1-c2d2-f2b09e7b3fb1
+        type: string
+      login:
+        example: testUser123
+        type: string
+      phone_number:
+        example: "+71234567890"
+        type: string
+    type: object
+info:
+  contact:
+    email: gusiatnikovanatalia@gmail.com
+  license:
+    name: free-to-use-license
+  title: Chat Server API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Return 200 and empty json if service is OK
+      tags:
+      - Health check
+  /login:
+    post:
+      parameters:
+      - description: Login and password for user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/LoginRequestBody'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Request body is incorrect or data validation have failed
+        "404":
+          description: User with the specified login is not exists
+        "415":
+          description: Content-Type application/json is missing
+      summary: Login user in system by checking the specified password
+      tags:
+      - User operations
+  /register:
+    post:
+      parameters:
+      - description: Login, Password, Email, Phone number for user
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/RegisterRequestBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/RegisterResponseBody'
+        "400":
+          description: Request body is incorrect or data validation have failed
+        "409":
+          description: User with the specified login | email | phone number is already
+            exists
+        "415":
+          description: Content-Type application/json is missing
+      summary: Register new user
+      tags:
+      - User operations
+swagger: "2.0"

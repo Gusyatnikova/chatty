@@ -7,7 +7,7 @@ import "github.com/labstack/echo/v4"
 // @Tags    Health check
 // @Produce json
 // @Success 200
-// @Router  /healthcheck [get]
+// @Router  /health [get]
 func (e *ServerHandler) HealthCheck(eCtx echo.Context) error {
 	return e.uc.HealthCheck(eCtx.Request().Context())
 }
