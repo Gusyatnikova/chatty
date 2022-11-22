@@ -1,0 +1,35 @@
+version: '2.9'
+
+services:
+  chatty:
+    container_name: chatty_run
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - chatty-net
+  postgresdb:
+    image: postgres
+    container_name: chatty_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./pkg/repository/postgres/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    networks:
+      - chatty-net
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+
+networks:
+  chatty-net:
+    driver: bridge

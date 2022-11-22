@@ -2,39 +2,27 @@ package postgres
 
 import (
 	"context"
-	"log"
-	"strconv"
-	"time"
+	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"chatty/chatty/app/config"
 )
 
-func Connection(pgConf config.PG) *pgxpool.Pool {
-	//todo: use sprintf
-	conf, err := pgxpool.ParseConfig("user=" + pgConf.User +
-		" " + "password=" + pgConf.Password +
-		" " + "host=" + pgConf.Host +
-		" " + "dbname=" + pgConf.DbName +
-		" " + "port=" + strconv.Itoa(pgConf.Port) +
-		" " + "pool_max_conns=" + strconv.Itoa(pgConf.PoolMax))
+func Connection(ctx context.Context, pgCfg config.PG) (*pgxpool.Pool, error) {
+	cfgStr := fmt.Sprintf(
+		"user=%s password=%s host=%s dbname=%s port=%d pool_max_conns=%d",
+		pgCfg.User, pgCfg.Password, pgCfg.Host, pgCfg.DbName, pgCfg.Port, pgCfg.PoolMax)
+
+	cfg, err := pgxpool.ParseConfig(cfgStr)
 	if err != nil {
-		//todo: never use fatal, return error
-		//add Conneection() (pool, error)
-		log.Fatal(err)
+		return nil, err
 	}
 
-	//move tihs envs to config
-	conf.HealthCheckPeriod = time.Second * 30
-	conf.MaxConnIdleTime = time.Second
-	conf.MinConns = 2
-
-	pgConnect, err := pgxpool.ConnectConfig(context.Background(), conf)
+	pgConn, err := pgxpool.ConnectConfig(ctx, cfg)
 	if err != nil {
-		//
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return pgConnect
+	return pgConn, nil
 }

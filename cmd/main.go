@@ -7,8 +7,7 @@ import (
 )
 
 func main() {
-	chatService := app.NewChatService(context.Background())
-	//todo: run or
+	chatService := app.NewChatty(context.Background())
 	chatService.Run()
 	chatService.ListenForShutdown()
 }

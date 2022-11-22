@@ -1,72 +1,72 @@
 package http
 
 import (
+	"chatty/chatty/delivery/http/http_v1/middleware"
 	"context"
-	"fmt"
+	"errors"
+	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog/log"
 
 	"chatty/chatty/delivery/http/http_v1"
 	"chatty/chatty/usecase"
 )
 
-type ChatServer interface {
+type Server interface {
 	Run()
 	Shutdown()
 }
 
 type ServerConfig struct {
-	Address     string
-	ChatUsecase usecase.ChatUseCase
-	Logger      usecase.ChatLogger
+	Address string
 }
 
-type chatHttpServer struct {
+type server struct {
 	ctx        context.Context
-	cfg        ServerConfig
 	httpServer *echo.Echo
 }
 
-func NewChatHttpServer(ctx context.Context, cfg ServerConfig) ChatServer {
+func NewServer(ctx context.Context, cfg ServerConfig, uc usecase.ChatUseCase) Server {
 	e := echo.New()
-
 	e.Server.Addr = cfg.Address
-	//todo: change to logging with logLevel,
-	//use mw to work wityh tokens
+
 	e.Use(
 		mw.LoggerWithConfig(mw.LoggerConfig{
 			Format: `{"time":"${time_rfc3339_nano}","remote_ip":"${remote_ip}","host":"${host}","method":"${method}",` +
-				`"uri":"${uri}","query":"${query}","user_agent":"${user_agent}","status":${status},"error":"${error}"}` + "\n",
+				`"uri":"${uri}","query":"${query}","status":${status},"error":"${error}"}` + "\n",
 		}),
 		mw.Recover())
 
-	//ToDo: add tokens handler to midleware chain
+	e.Use(middleware.ErrorHandlerMiddleware)
 
-	http_v1.NewChatServerHandler(e, cfg.ChatUsecase, cfg.Logger)
+	http_v1.NewServerHandler(e, uc)
 
-	return &chatHttpServer{
+	return &server{
 		ctx:        ctx,
-		cfg:        cfg,
 		httpServer: e,
 	}
 }
 
-func (e *chatHttpServer) Run() {
-	e.cfg.Logger.Info(fmt.Sprintf("HTTP server listening at %v", e.httpServer.Server.Addr))
+func (e *server) Run() {
+	log.Info().Msgf("HTTP server listening at %v", e.httpServer.Server.Addr)
+
 	if err := e.httpServer.Server.ListenAndServe(); err != nil {
-		e.cfg.Logger.Panic(fmt.Sprintf("err in chatHttpServer.Run(): %s", err.Error()))
+		if !errors.Is(err, http.ErrServerClosed) {
+			log.Panic().Msgf("err in server.Run(): %s", err.Error())
+		}
 	}
 }
 
-func (e *chatHttpServer) Shutdown() {
+func (e *server) Shutdown() {
 	ctx, cancel := context.WithTimeout(e.ctx, 2*time.Second)
 	defer cancel()
 
-	e.cfg.Logger.Warn("Shutting down the chatHttpServer")
+	log.Info().Msg("Shutting down the server")
 
 	if err := e.httpServer.Server.Shutdown(ctx); err != nil {
-		e.cfg.Logger.Error(fmt.Sprintf("err in chatHttpServer.Shutdown(): %s", err.Error()))
+		log.Error().Msgf("err in server.Shutdown(): %s", err.Error())
 	}
 }

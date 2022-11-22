@@ -1,4 +1,4 @@
-package usecase
+package repository
 
 import (
 	"context"
@@ -6,9 +6,8 @@ import (
 	"chatty/chatty/entity"
 )
 
-type ChatUseCase interface {
-	Register(context.Context, entity.User) error
-	Login(context.Context, entity.UserCreds) error
+type ChattyUserRepo interface {
+	AddUser(context.Context, entity.User) error
 	GetUserByLogin(context.Context, entity.UserLogin) (entity.User, error)
 
 	HealthCheck(ctx context.Context) error

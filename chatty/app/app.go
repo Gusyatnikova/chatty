@@ -1,59 +1,67 @@
 package app
 
 import (
+	chatty2 "chatty/chatty/usecase/chatty"
+	"chatty/pkg/password"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"chatty/chatty/app/config"
+	"chatty/chatty/delivery"
 	"chatty/chatty/repository/postgres"
 	"chatty/chatty/usecase"
 	"chatty/pkg/http"
-	"chatty/pkg/logger"
 	dbConn "chatty/pkg/repository/postgres"
 )
 
-//todo: delete this layer and move echo server here
-
-type chatService struct {
-	httpServer http.ChatServer
+type chatty struct {
+	httpServer http.Server
+	usecase    usecase.ChatUseCase
 }
 
-//todo: rename to application
-func NewChatService(ctx context.Context) usecase.ChatService {
+func NewChatty(ctx context.Context) delivery.ChattyServer {
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatalf("err in config.NewConfig(): %s", err)
+		log.Panic().Msgf("err in NewChatty.NewConfig(): %s", err.Error())
 	}
 
-	usrRepo := postgres.NewPgUserRepo(dbConn.Connection(cfg.PG))
+	initLogger()
 
-	chatUC := usecase.NewChatUseCase(usrRepo)
+	pgConn, err := dbConn.Connection(ctx, cfg.Pg)
+	if err != nil {
+		log.Panic().Msgf("err in NewChatty.dbConn.Connection(): %s", err.Error())
+	}
+
+	chattyRepo := postgres.NewPgChattyRepo(pgConn)
+	pwdService := password.NewService()
+	uc := chatty2.NewChattyUseCase(chattyRepo, pwdService)
 
 	httpServerCfg := http.ServerConfig{
-		Address:     fmt.Sprint(cfg.HTTP.Host, ":", cfg.HTTP.Port),
-		ChatUsecase: chatUC,
-		//todo: use zero-log, delete logger
-		Logger: logger.NewLogger(),
+		Address: fmt.Sprint(cfg.Http.Host, ":", cfg.Http.Port),
 	}
-	httpServer := http.NewChatHttpServer(ctx, httpServerCfg)
+	httpServer := http.NewServer(ctx, httpServerCfg, uc)
 
-	return &chatService{httpServer: httpServer}
+	return &chatty{
+		httpServer: httpServer,
+		usecase:    uc,
+	}
 }
 
-func (e *chatService) Run() {
-	e.httpServer.Run()
-
+func (e *chatty) Run() {
+	go e.httpServer.Run()
 }
 
-func (e *chatService) Shutdown() {
+func (e *chatty) Shutdown() {
 	e.httpServer.Shutdown()
 }
 
-func (e *chatService) ListenForShutdown() {
+func (e *chatty) ListenForShutdown() {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 
@@ -65,4 +73,8 @@ func (e *chatService) ListenForShutdown() {
 		}
 	}
 	close(ch)
+}
+
+func initLogger() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 }
