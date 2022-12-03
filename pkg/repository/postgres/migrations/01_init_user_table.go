@@ -2,7 +2,6 @@ package migrations
 
 import (
 	"database/sql"
-
 	"github.com/pressly/goose/v3"
 )
 
@@ -20,10 +19,10 @@ const (
 )
 
 func init() {
-	goose.AddMigration(Up00001, Down00001)
+	goose.AddMigration(Up01, Down01)
 }
 
-func Up00001(tx *sql.Tx) error {
+func Up01(tx *sql.Tx) error {
 	_, err := tx.Exec(InitUserTableSqlQry)
 	if err != nil {
 		return err
@@ -32,7 +31,7 @@ func Up00001(tx *sql.Tx) error {
 	return nil
 }
 
-func Down00001(tx *sql.Tx) error {
+func Down01(tx *sql.Tx) error {
 	_, err := tx.Exec(DropUserTableSqlQry)
 	if err != nil {
 		return err
