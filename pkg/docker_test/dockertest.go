@@ -59,23 +59,6 @@ func NewDockerResource(cfg *DockerConfig) (*DockerResource, error) {
 	return &DockerResource{Resource: resource, Pool: pool}, nil
 }
 
-func NewRedis() *DockerResource {
-	dockerCfg := &DockerConfig{
-		HostIP:        "localhost",
-		HostPort:      "6379",
-		DockerPort:    "6379/tcp",
-		ContainerName: "redis-task-scheduler",
-		ImageName:     "redis",
-		ImageTag:      "latest",
-	}
-
-	dockerResource, err := NewDockerResource(dockerCfg)
-	if err != nil {
-		panic(err)
-	}
-
-	return dockerResource
-}
 func NewPostgres() *DockerResource {
 	dockerCfg := &DockerConfig{
 		HostIP:        "",
@@ -85,10 +68,28 @@ func NewPostgres() *DockerResource {
 		ImageName:     "postgres",
 		ImageTag:      "latest",
 		Env: []string{
-			"POSTGRES_USER=pgu",
+			"POSTGRES_USER=postgres",
 			"POSTGRES_DB=chatty",
-			"POSTGRES_PASSWORD=pg000PG",
+			"POSTGRES_PASSWORD=postgres",
 		},
+	}
+
+	dockerResource, err := NewDockerResource(dockerCfg)
+	if err != nil {
+		panic(err)
+	}
+
+	return dockerResource
+}
+
+func NewRedis() *DockerResource {
+	dockerCfg := &DockerConfig{
+		HostIP:        "localhost",
+		HostPort:      "6379",
+		DockerPort:    "6379/tcp",
+		ContainerName: "redis-task-scheduler",
+		ImageName:     "redis",
+		ImageTag:      "latest",
 	}
 
 	dockerResource, err := NewDockerResource(dockerCfg)
