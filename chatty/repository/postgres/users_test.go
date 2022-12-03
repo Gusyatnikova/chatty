@@ -43,7 +43,10 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 		t.Error(err)
 	}
 
-	RunPgMigrations(cfg.Pg)
+	err = RunPgMigrations(cfg.Pg, int64(1))
+	if err != nil {
+		t.Error(err)
+	}
 
 	tests := []struct {
 		name        string
@@ -68,7 +71,7 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 			},
 		},
 		{
-			name:        "Adding a duplicated user should cause an error",
+			name:        "Adding a duplicated user should throw an error",
 			wantErr:     true,
 			expectEqual: false,
 			user: entity.User{
@@ -95,6 +98,7 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 
 			if tt.expectEqual {
 				user := entity.User{}
+
 				row := pgDb.QueryRow(ctx, `select id, login, password, email, phone_number from public.user
 							where login = $1`, tt.user.Creds.Login)
 				err := row.Scan(&user.ID, &user.Creds.Login, &user.Creds.Password,
@@ -107,7 +111,70 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 	}
 }
 
-func RunPgMigrations(cfgPg config.PG) error {
+func TestPgUserRepo_GetUserByLogin(t *testing.T) {
+	docker_test.InitEnv()
+	ctx := context.Background()
+
+	cfg, err := config.NewConfig()
+	if err != nil {
+		t.Error(err)
+	}
+
+	pgResource := docker_test.NewPostgres()
+	defer func() {
+		if err := pgResource.Pool.RemoveContainerByName(pgResource.Resource.Container.Name); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	time.Sleep(time.Second * 3)
+
+	pgDb, err := postgres.Connection(ctx, cfg.Pg)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = RunPgMigrations(cfg.Pg, int64(2))
+	if err != nil {
+		t.Error(err)
+	}
+
+	tests := []struct {
+		name        string
+		wantErr     bool
+		expectEqual bool
+		userLogin   entity.UserLogin
+	}{
+		{
+			name:        "Getting an existing user from the users table should pass without errors",
+			wantErr:     false,
+			expectEqual: true,
+			userLogin:   "user1",
+		},
+		{
+			name:        "Getting a non-existent user should throw an error",
+			wantErr:     true,
+			expectEqual: false,
+			userLogin:   "userNotFound",
+		},
+	}
+
+	repo := repo.NewPgChattyRepo(pgDb)
+
+	for _, tt := range tests {
+		convey.Convey(tt.name, t, func() {
+			user, err := repo.GetUserByLogin(ctx, tt.userLogin)
+
+			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
+
+			if tt.expectEqual {
+				convey.ShouldEqual(user.Creds.Login, tt.userLogin)
+			}
+		})
+	}
+}
+
+func RunPgMigrations(cfgPg config.PG, v int64) error {
 	connStr := fmt.Sprintf(
 		"user=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
 		cfgPg.User, cfgPg.Password, cfgPg.Host, cfgPg.DbName, cfgPg.Port, "disable")
@@ -117,7 +184,7 @@ func RunPgMigrations(cfgPg config.PG) error {
 		return err
 	}
 
-	err = goose.Up(mdb, "/")
+	err = goose.UpTo(mdb, "/", v)
 	if err != nil {
 		return err
 	}
