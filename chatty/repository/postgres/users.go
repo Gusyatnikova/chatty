@@ -30,7 +30,7 @@ func (e *pgUserRepo) AddUser(ctx context.Context, user entity.User) error {
 
 func (e *pgUserRepo) GetUserByLogin(ctx context.Context, login entity.UserLogin) (entity.User, error) {
 	row := e.db.QueryRow(ctx, GetUserByLoginSqlCmd, login)
-	user, err := e.ScanUser(row)
+	user, err := e.scanUser(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return entity.User{}, repository.ErrNotFound
@@ -40,7 +40,7 @@ func (e *pgUserRepo) GetUserByLogin(ctx context.Context, login entity.UserLogin)
 	return user, errors.Wrap(err, "Err in: pgUserRepo.GetUserByLogin.ScanUser(): ")
 }
 
-func (e *pgUserRepo) ScanUser(row pgx.Row) (entity.User, error) {
+func (e *pgUserRepo) scanUser(row pgx.Row) (entity.User, error) {
 	user := entity.User{}
 
 	err := row.Scan(&user.ID, &user.Creds.Login, &user.Creds.Password,
