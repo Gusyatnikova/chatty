@@ -20,3 +20,9 @@ func isRequestBodyIsJSON(eCtx echo.Context) bool {
 
 	return false
 }
+
+//writeAuthBearerHeader set Authorization header for response in eCtx
+//to value "Bearer {token}"
+func writeAuthBearerHeader(eCtx echo.Context, token string) {
+	eCtx.Response().Header().Set("Authorization", "Bearer "+token)
+}

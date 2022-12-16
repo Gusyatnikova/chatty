@@ -10,6 +10,7 @@ type (
 	Config struct {
 		Http HTTP
 		Pg   PG
+		Jwt  JWT
 	}
 
 	HTTP struct {
@@ -24,6 +25,11 @@ type (
 		User     string `env-required:"true" env:"POSTGRES_USER"`
 		Password string `env-required:"true" env:"POSTGRES_PASSWORD"`
 		DbName   string `env-required:"true" env:"POSTGRES_DB"`
+	}
+
+	JWT struct {
+		Sign string `env-required:"true" env:"JWT_SECRET"`
+		TTL  int64  `env-required:"true" env:"JWT_TTL_SEC"`
 	}
 )
 

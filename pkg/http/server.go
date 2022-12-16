@@ -1,7 +1,6 @@
 package http
 
 import (
-	"chatty/chatty/delivery/http/http_v1/middleware"
 	"context"
 	"errors"
 	"net/http"
@@ -11,7 +10,9 @@ import (
 	mw "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog/log"
 
+	"chatty/chatty/app/config"
 	"chatty/chatty/delivery/http/http_v1"
+	"chatty/chatty/delivery/http/http_v1/middleware"
 	"chatty/chatty/usecase"
 )
 
@@ -22,6 +23,7 @@ type Server interface {
 
 type ServerConfig struct {
 	Address string
+	JwtCfg  config.JWT
 }
 
 type server struct {
@@ -40,9 +42,10 @@ func NewServer(ctx context.Context, cfg ServerConfig, uc usecase.ChatUseCase) Se
 		}),
 		mw.Recover())
 
+	e.Use(middleware.JWTHandlerMiddleware(cfg.JwtCfg))
 	e.Use(middleware.ErrorHandlerMiddleware)
 
-	http_v1.NewServerHandler(e, uc)
+	http_v1.NewServerHandler(e, uc, cfg.JwtCfg)
 
 	return &server{
 		ctx:        ctx,

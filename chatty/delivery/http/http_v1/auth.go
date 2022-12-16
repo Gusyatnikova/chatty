@@ -1,12 +1,14 @@
 package http_v1
 
 import (
-	"chatty/chatty/delivery"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
 
+	"github.com/labstack/echo/v4"
+
+	"chatty/chatty/delivery"
 	"chatty/chatty/entity"
+	jwt2 "chatty/pkg/http/jwt"
 )
 
 type UserCreds struct {
@@ -54,6 +56,13 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 		return err
 	}
 
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg)
+	if err != nil {
+		return err
+	}
+
+	writeAuthBearerHeader(eCtx, jwtToken)
+
 	return e.uc.Login(eCtx.Request().Context(), userCreds)
 }
 
@@ -86,6 +95,14 @@ func (e *ServerHandler) Register(eCtx echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	//todo: add this err to middleware
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg)
+	if err != nil {
+		return err
+	}
+
+	writeAuthBearerHeader(eCtx, jwtToken)
 
 	return eCtx.JSON(http.StatusCreated, userToRegisterRespBody(newUser))
 }

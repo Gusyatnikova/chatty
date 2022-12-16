@@ -44,6 +44,7 @@ func NewChatty(ctx context.Context) delivery.ChattyServer {
 
 	httpServerCfg := http.ServerConfig{
 		Address: fmt.Sprint(cfg.Http.Host, ":", cfg.Http.Port),
+		JwtCfg:  cfg.Jwt,
 	}
 	httpServer := http.NewServer(ctx, httpServerCfg, uc)
 
