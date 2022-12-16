@@ -14,5 +14,5 @@ func InitEnv() {
 	os.Setenv("POSTGRES_DB", "chatty")
 	os.Setenv("POSTGRES_POOL_MAX", "5")
 	os.Setenv("JWT_SIGN", "secureJWTsign")
-	os.Setenv("JWT_EXPIRED_MINUTES", "5")
+	os.Setenv("JWT_TTL_SEC", "120")
 }
