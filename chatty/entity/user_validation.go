@@ -17,7 +17,7 @@ func (e User) Validate() error {
 func (e UserCreds) Validate() error {
 	return validation.ValidateStruct(&e,
 		validation.Field(&e.Login, validation.Required, validation.Length(1, 256), validation.Match(regexp.MustCompile("^[A-Za-z_]+[0-9]+$"))),
-		validation.Field(&e.Password, validation.Required, validation.Length(1, 128), validation.Match(regexp.MustCompile("^[A-Za-z0-9!@#$%^&*_+-=()]+$"))),
+		validation.Field(&e.Password, validation.Required, validation.Length(1, 128), validation.Match(regexp.MustCompile("^[A-Za-z0-9!@#$%^&*_+\\-=\\()]+$"))),
 	)
 }
 
