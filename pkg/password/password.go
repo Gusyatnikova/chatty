@@ -7,27 +7,31 @@ import (
 	"fmt"
 	"golang.org/x/crypto/argon2"
 	"strings"
+
+	"chatty/chatty/app/config"
 )
 
 type params struct {
+	secret      []byte
 	memory      uint32
 	iterations  uint32
-	parallelism uint8
 	saltLength  uint32
 	keyLength   uint32
+	parallelism uint8
 }
 
 type Service struct {
 	params params
 }
 
-func NewService() Passworder {
+func NewService(cfg config.Password) Passworder {
 	return &Service{params: params{
-		memory:      64 * 1024,
-		iterations:  3,
-		parallelism: 2,
-		saltLength:  16,
-		keyLength:   32,
+		secret:      []byte(cfg.Secret),
+		memory:      cfg.Memory,
+		iterations:  cfg.Iterations,
+		parallelism: cfg.Parallelism,
+		saltLength:  cfg.SaltLength,
+		keyLength:   cfg.KeyLength,
 	}}
 }
 
@@ -36,8 +40,9 @@ func (e Service) Generate(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	secretSalt := append(salt, e.params.secret...)
 
-	hash := argon2.IDKey([]byte(password), salt,
+	hash := argon2.IDKey([]byte(password), secretSalt,
 		e.params.iterations, e.params.memory, e.params.parallelism, e.params.keyLength)
 
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
@@ -55,7 +60,8 @@ func (e Service) Compare(password, encodedHash string) (bool, error) {
 		return false, err
 	}
 
-	pwdHash := argon2.IDKey([]byte(password), salt, p.iterations, p.memory, p.parallelism, p.keyLength)
+	secretSalt := append(salt, e.params.secret...)
+	pwdHash := argon2.IDKey([]byte(password), secretSalt, p.iterations, p.memory, p.parallelism, p.keyLength)
 	if subtle.ConstantTimeCompare(hash, pwdHash) == 1 {
 		return true, nil
 	}

@@ -39,7 +39,7 @@ func NewChatty(ctx context.Context) delivery.ChattyServer {
 	}
 
 	chattyRepo := postgres.NewPgChattyRepo(pgConn)
-	pwdService := password.NewService()
+	pwdService := password.NewService(cfg.Password)
 	uc := chatty2.NewChattyUseCase(chattyRepo, pwdService)
 
 	httpServerCfg := http.ServerConfig{
