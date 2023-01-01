@@ -70,7 +70,7 @@ func (e *chatUseCase) addUser(ctx context.Context, user entity.User) error {
 
 	pwd, err := e.generateUserPassword(userInternal.Creds.Password)
 	if err != nil {
-		errors.Wrap(err, "err in chatUseCase.addUser.generateUserPassword():")
+		return errors.Wrap(err, "err in chatUseCase.addUser.generateUserPassword():")
 	}
 
 	userInternal.Creds.Password = entity.UserPassword(pwd)

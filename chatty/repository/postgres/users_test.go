@@ -88,11 +88,11 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 		},
 	}
 
-	repo := repo.NewPgChattyRepo(pgDb)
+	repository := repo.NewPgChattyRepo(pgDb)
 
 	for _, tt := range tests {
 		convey.Convey(tt.name, t, func() {
-			err := repo.AddUser(ctx, tt.user)
+			err := repository.AddUser(ctx, tt.user)
 
 			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
 
@@ -159,11 +159,11 @@ func TestPgUserRepo_GetUserByLogin(t *testing.T) {
 		},
 	}
 
-	repo := repo.NewPgChattyRepo(pgDb)
+	repository := repo.NewPgChattyRepo(pgDb)
 
 	for _, tt := range tests {
 		convey.Convey(tt.name, t, func() {
-			user, err := repo.GetUserByLogin(ctx, tt.userLogin)
+			user, err := repository.GetUserByLogin(ctx, tt.userLogin)
 
 			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
 
