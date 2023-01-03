@@ -2,10 +2,11 @@ package password
 
 import (
 	"crypto/subtle"
-	"encoding/base64"
+	"encoding/hex"
 	"fmt"
-	"golang.org/x/crypto/argon2"
 	"strings"
+
+	"golang.org/x/crypto/argon2"
 )
 
 func (e Service) Compare(password, encodedHash string) (bool, error) {
@@ -44,13 +45,13 @@ func decodeHash(encodedHash string) (p *params, salt, hash []byte, err error) {
 		return nil, nil, nil, err
 	}
 
-	salt, err = base64.RawStdEncoding.Strict().DecodeString(vals[4])
+	salt, err = hex.DecodeString(vals[4])
 	if err != nil {
 		return nil, nil, nil, err
 	}
 	p.saltLength = uint32(len(salt))
 
-	hash, err = base64.RawStdEncoding.Strict().DecodeString(vals[5])
+	hash, err = hex.DecodeString(vals[5])
 	if err != nil {
 		return nil, nil, nil, err
 	}

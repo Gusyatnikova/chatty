@@ -2,8 +2,9 @@ package password
 
 import (
 	"crypto/rand"
-	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+
 	"golang.org/x/crypto/argon2"
 )
 
@@ -17,11 +18,11 @@ func (e Service) Generate(password string) (string, error) {
 	hash := argon2.IDKey([]byte(password), secretSalt,
 		e.params.iterations, e.params.memory, e.params.parallelism, e.params.keyLength)
 
-	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
-	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
+	hexSalt := hex.EncodeToString(salt)
+	hexHash := hex.EncodeToString(hash)
 
 	encodedHash := fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d,k=%d$%s$%s",
-		argon2.Version, e.params.memory, e.params.iterations, e.params.parallelism, e.params.keyLength, b64Salt, b64Hash)
+		argon2.Version, e.params.memory, e.params.iterations, e.params.parallelism, e.params.keyLength, hexSalt, hexHash)
 
 	return encodedHash, nil
 }
