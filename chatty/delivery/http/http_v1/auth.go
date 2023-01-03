@@ -56,7 +56,7 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 		return err
 	}
 
-	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg)
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, userCreds.Login)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (e *ServerHandler) Register(eCtx echo.Context) error {
 	}
 
 	//todo: add this err to middleware
-	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg)
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, newUser.Creds.Login)
 	if err != nil {
 		return err
 	}
