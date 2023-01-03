@@ -11,7 +11,7 @@ import (
 
 var SigningMethod = jwt.SigningMethodHS256
 
-func GenerateJwtToken(cfg config.JWT, login entity.UserLogin) (string, error) {
+func GenerateToken(cfg config.JWT, login entity.UserLogin) (string, error) {
 	token := jwt.NewWithClaims(SigningMethod, jwt.StandardClaims{
 		Subject:   string(login),
 		ExpiresAt: time.Now().Add(time.Second * time.Duration(cfg.TTL)).Unix(),

@@ -34,7 +34,7 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 		return err
 	}
 
-	jwtToken, err := jwt.GenerateJwtToken(e.jwtCfg, userCreds.Login)
+	jwtToken, err := jwt.GenerateToken(e.jwtCfg, userCreds.Login)
 	if err != nil {
 		return err
 	}
