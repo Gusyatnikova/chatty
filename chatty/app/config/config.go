@@ -8,9 +8,10 @@ import (
 
 type (
 	Config struct {
-		Http HTTP
-		Pg   PG
-		Jwt  JWT
+		Pg       PG
+		Password Password
+		Http     HTTP
+		Jwt      JWT
 	}
 
 	HTTP struct {
@@ -19,17 +20,26 @@ type (
 	}
 
 	PG struct {
-		PoolMax  int    `env-required:"true" env:"POSTGRES_POOL_MAX"`
-		Host     string `env-required:"true" env:"POSTGRES_HOST"`
-		Port     int    `env-required:"true" env:"POSTGRES_PORT"`
+		DbName   string `env-required:"true" env:"POSTGRES_DB"`
 		User     string `env-required:"true" env:"POSTGRES_USER"`
 		Password string `env-required:"true" env:"POSTGRES_PASSWORD"`
-		DbName   string `env-required:"true" env:"POSTGRES_DB"`
+		Host     string `env-required:"true" env:"POSTGRES_HOST"`
+		Port     int    `env-required:"true" env:"POSTGRES_PORT"`
+		PoolMax  int    `env-required:"true" env:"POSTGRES_POOL_MAX"`
 	}
 
 	JWT struct {
 		Sign string `env-required:"true" env:"JWT_SECRET"`
 		TTL  int64  `env-required:"true" env:"JWT_TTL_SEC"`
+	}
+
+	Password struct {
+		Secret      string `env-required:"true" env:"PASSWORD_SECRET"`
+		Memory      uint32 `env-required:"true" env:"PASSWORD_MEMORY"`
+		Iterations  uint32 `env-required:"true" env:"PASSWORD_ITERATIONS"`
+		SaltLength  uint32 `env-required:"true" env:"PASSWORD_SALT_LENGTH"`
+		KeyLength   uint32 `env-required:"true" env:"PASSWORD_KEY_LENGTH"`
+		Parallelism uint8  `env-required:"true" env:"PASSWORD_PARALLELISM"`
 	}
 )
 

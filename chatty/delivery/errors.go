@@ -2,6 +2,6 @@ package delivery
 
 import "github.com/pkg/errors"
 
-var ErrBadContentType = errors.New("Content-Type application/json is missing")
-var ErrBadRequestBody = errors.New("Request body is incorrect")
-var ErrUnauthorizied = errors.New("Authorization is required")
+var ErrBadContentType = errors.New("content-Type application/json is missing")
+var ErrBadRequestBody = errors.New("request body is incorrect")
+var ErrUnauthorizied = errors.New("authorization is required")
