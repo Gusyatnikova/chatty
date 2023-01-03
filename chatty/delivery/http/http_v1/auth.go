@@ -96,7 +96,6 @@ func (e *ServerHandler) Register(eCtx echo.Context) error {
 		return err
 	}
 
-	//todo: add this err to middleware
 	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, newUser.Creds.Login)
 	if err != nil {
 		return err
