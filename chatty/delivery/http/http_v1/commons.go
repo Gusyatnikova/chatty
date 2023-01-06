@@ -4,6 +4,20 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+
+	"chatty/chatty/entity"
+)
+
+type (
+	UserCreds struct {
+		Login    entity.UserLogin    `json:"login"  example:"testUser123"`
+		Password entity.UserPassword `json:"password"  example:"q123!@#Q"`
+	} //@name UserCredentials
+
+	UserContacts struct {
+		Email       string `json:"email" example:"example@gmail.com"`
+		PhoneNumber string `json:"phone_number" example:"+71234567890"`
+	}
 )
 
 //isRequestBodyIsJSON returns true if header Contain-type with value application/json are in the request

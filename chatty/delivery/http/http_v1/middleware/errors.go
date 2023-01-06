@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"chatty/pkg/http/jwt"
 	"net/http"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -42,7 +43,12 @@ func errToHttpErr(err error) (int, interface{}) {
 		return http.StatusNotFound, err.Error()
 	}
 
-	//validation error
+	//JWT errors
+	if errors.Is(err, jwt.ErrUnableGenerateToken) {
+		return http.StatusUnauthorized, jwt.ErrUnableGenerateToken.Error()
+	}
+
+	//validation errors
 	if _, ok := err.(validation.Errors); ok {
 		return http.StatusBadRequest, err
 	}
