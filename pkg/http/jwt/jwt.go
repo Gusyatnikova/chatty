@@ -8,9 +8,10 @@ import (
 
 var SigningMethod = jwt.SigningMethodHS256
 
-func GenerateJwtToken(cfg config.JWT) (string, error) {
+func GenerateJwtToken(cfg config.JWT, sub string) (string, error) {
 	token := jwt.NewWithClaims(SigningMethod, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Second * time.Duration(cfg.TTL)).Unix(),
+		Subject:   sub,
 	})
 
 	return token.SignedString([]byte(cfg.Sign))
