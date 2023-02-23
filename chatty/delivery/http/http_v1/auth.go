@@ -56,14 +56,23 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 		return err
 	}
 
-	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, "")
+	if err := e.uc.Login(eCtx.Request().Context(), userCreds); err != nil {
+		return err
+	}
+
+	user, err := e.uc.GetUserByLogin(eCtx.Request().Context(), userCreds.Login)
+	if err != nil {
+		return nil
+	}
+
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, user.GetID())
 	if err != nil {
 		return err
 	}
 
 	writeAuthBearerHeader(eCtx, jwtToken)
 
-	return e.uc.Login(eCtx.Request().Context(), userCreds)
+	return eCtx.JSON(http.StatusOK, userToRespBody(user))
 }
 
 // Register godoc
@@ -91,20 +100,14 @@ func (e *ServerHandler) Register(eCtx echo.Context) error {
 		return err
 	}
 
-	newUser, err := e.uc.GetUserByLogin(eCtx.Request().Context(), user.Creds.Login)
-	if err != nil {
-		return err
-	}
-
-	//todo: add this err to middleware
-	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, "")
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, user.GetID())
 	if err != nil {
 		return err
 	}
 
 	writeAuthBearerHeader(eCtx, jwtToken)
 
-	return eCtx.JSON(http.StatusCreated, userToRespBody(newUser))
+	return eCtx.JSON(http.StatusCreated, userToRespBody(user))
 }
 
 func parseRegisterReqBody(eCtx echo.Context) (registerReqBody, error) {
