@@ -25,6 +25,10 @@ type User struct {
 	Contacts UserContacts
 }
 
-func (e User) GetID() string {
+func (e *User) GetID() string {
 	return ulid.ULID(e.ID).String()
+}
+
+func (e *User) GenerateID() {
+	e.ID = UserID(ulid.Make())
 }
