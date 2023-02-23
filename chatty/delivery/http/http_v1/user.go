@@ -14,5 +14,5 @@ func (e *ServerHandler) GetUser(eCtx echo.Context) error {
 		return err
 	}
 
-	return eCtx.JSON(http.StatusOK, userToRegisterRespBody(user))
+	return eCtx.JSON(http.StatusOK, userToRespBody(user))
 }

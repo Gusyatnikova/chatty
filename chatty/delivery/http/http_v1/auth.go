@@ -30,11 +30,11 @@ type loginReqBody struct {
 	UserCreds
 } //@name LoginRequestBody
 
-type registerRespBody struct {
+type userRespBody struct {
 	ID        string           `json:"id" example:"018496f4-77d7-0ef1-c2d2-f2b09e7b3fb1"`
 	UserLogin entity.UserLogin `json:"login"  example:"testUser123"`
 	UserContacts
-} //@name RegisterResponseBody
+} //@name UserResponseBody
 
 // Login godoc
 // @Summary Login user in system by checking the specified password
@@ -56,7 +56,7 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 		return err
 	}
 
-	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg)
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, "")
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 // @Tags    User operations
 // @Produce json
 // @Param   request body registerReqBody true "Login, Password, Email, Phone number for user"
-// @Success 201     {object} registerRespBody
+// @Success 201     {object} userRespBody
 // @Failure 400     "Request body is incorrect or data validation have failed"
 // @Failure 409     "User with the specified login | email | phone number is already exists"
 // @Failure 415     "Content-Type application/json is missing"
@@ -97,14 +97,14 @@ func (e *ServerHandler) Register(eCtx echo.Context) error {
 	}
 
 	//todo: add this err to middleware
-	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg)
+	jwtToken, err := jwt2.GenerateJwtToken(e.jwtCfg, "")
 	if err != nil {
 		return err
 	}
 
 	writeAuthBearerHeader(eCtx, jwtToken)
 
-	return eCtx.JSON(http.StatusCreated, userToRegisterRespBody(newUser))
+	return eCtx.JSON(http.StatusCreated, userToRespBody(newUser))
 }
 
 func parseRegisterReqBody(eCtx echo.Context) (registerReqBody, error) {
@@ -156,8 +156,8 @@ func loginReqBodyToUserCreds(body loginReqBody) entity.UserCreds {
 	}
 }
 
-func userToRegisterRespBody(user entity.User) registerRespBody {
-	return registerRespBody{
+func userToRespBody(user entity.User) userRespBody {
+	return userRespBody{
 		UserLogin: user.Creds.Login,
 		UserContacts: UserContacts{
 			Email:       user.Contacts.Email,
