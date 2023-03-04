@@ -2,6 +2,7 @@ package http_v1
 
 import (
 	"chatty/chatty/app/config"
+	"chatty/pkg/http/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/swaggo/echo-swagger"
 
@@ -16,20 +17,21 @@ import (
 // @license.name  free-to-use-license
 
 type ServerHandler struct {
-	uc     usecase.ChatUseCase
-	jwtCfg config.JWT
+	uc         usecase.ChatUseCase
+	jwtManager *jwt.JWTManager
 }
 
 func NewServerHandler(e *echo.Echo, uc usecase.ChatUseCase, jwtCfg config.JWT) {
 	h := &ServerHandler{
-		uc:     uc,
-		jwtCfg: jwtCfg,
+		uc:         uc,
+		jwtManager: jwt.NewJWTManager(jwtCfg),
 	}
 
 	e.POST("login", h.Login)
 	e.POST("register", h.Register)
 
-	e.GET("user/:login", h.GetUser)
+	e.GET("user/:login", h.GetUserByLogin)
+	e.GET("whoami", h.GetUserByToken)
 
 	e.GET("health", h.HealthCheck)
 	e.GET("/swagger/*", echoSwagger.WrapHandler)

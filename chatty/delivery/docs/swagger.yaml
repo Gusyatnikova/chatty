@@ -23,7 +23,7 @@ definitions:
         example: "+71234567890"
         type: string
     type: object
-  RegisterResponseBody:
+  UserResponseBody:
     properties:
       email:
         example: example@gmail.com
@@ -65,9 +65,13 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/LoginRequestBody'
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/UserResponseBody'
         "400":
           description: Request body is incorrect or data validation have failed
         "404":
@@ -92,7 +96,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/RegisterResponseBody'
+            $ref: '#/definitions/UserResponseBody'
         "400":
           description: Request body is incorrect or data validation have failed
         "409":
@@ -101,6 +105,42 @@ paths:
         "415":
           description: Content-Type application/json is missing
       summary: Register new user
+      tags:
+      - User operations
+  /user/{login}:
+    get:
+      parameters:
+      - description: User's login
+        in: path
+        name: login
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserResponseBody'
+        "400":
+          description: Data validation have failed
+        "404":
+          description: User with the specified login is not exists
+      summary: Return information about user based on login param
+      tags:
+      - User operations
+  /whoami:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserResponseBody'
+        "404":
+          description: User is not found
+      summary: Return information about user based on jwt token
       tags:
       - User operations
 swagger: "2.0"

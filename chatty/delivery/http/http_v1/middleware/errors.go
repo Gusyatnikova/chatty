@@ -38,6 +38,9 @@ func errToHttpErr(err error) (int, interface{}) {
 	if errors.Is(err, delivery.ErrBadContentType) {
 		return http.StatusUnsupportedMediaType, delivery.ErrBadContentType.Error()
 	}
+	if errors.Is(err, delivery.ErrBadRequest) {
+		return http.StatusBadRequest, delivery.ErrBadRequest.Error()
+	}
 	if errors.Is(err, echo.ErrNotFound) {
 		return http.StatusNotFound, err.Error()
 	}
