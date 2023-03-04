@@ -139,7 +139,7 @@ paths:
           schema:
             $ref: '#/definitions/UserResponseBody'
         "404":
-          description: User is not exists
+          description: User is not found
       summary: Return information about user based on jwt token
       tags:
       - User operations

@@ -166,7 +166,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "User is not exists"
+                        "description": "User is not found"
                     }
                 }
             }
