@@ -8,7 +8,6 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/oklog/ulid/v2"
 	"github.com/pressly/goose/v3"
 	"github.com/smartystreets/goconvey/convey"
 
@@ -49,41 +48,36 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		wantErr     bool
-		expectEqual bool
-		user        entity.User
+		name         string
+		wantErr      bool
+		expectEqual  bool
+		userCreds    entity.UserCreds
+		userContacts entity.UserContacts
 	}{
 		{
-			name:        "Adding a user to the users table should pass without errors",
+			name:        "Adding a userCreds to the users table should pass without errors",
 			wantErr:     false,
 			expectEqual: true,
-			user: entity.User{
-				ID: entity.UserID(ulid.Make()),
-				Creds: entity.UserCreds{
-					Login:    "user1",
-					Password: "user1Password",
-				},
-				Contacts: entity.UserContacts{
-					Email:       "user1@testmail.com",
-					PhoneNumber: "+71111111111",
-				},
+			userCreds: entity.UserCreds{
+				Login:    "user1",
+				Password: "user1Password",
+			},
+			userContacts: entity.UserContacts{
+				Email:       "user1@testmail.com",
+				PhoneNumber: "+71111111111",
 			},
 		},
 		{
-			name:        "Adding a duplicated user should throw an error",
+			name:        "Adding a duplicated userCreds should throw an error",
 			wantErr:     true,
 			expectEqual: false,
-			user: entity.User{
-				ID: entity.UserID(ulid.Make()),
-				Creds: entity.UserCreds{
-					Login:    "user1",
-					Password: "user1Password",
-				},
-				Contacts: entity.UserContacts{
-					Email:       "user1@testmail.com",
-					PhoneNumber: "+71111111111",
-				},
+			userCreds: entity.UserCreds{
+				Login:    "user1",
+				Password: "user1Password",
+			},
+			userContacts: entity.UserContacts{
+				Email:       "user1@testmail.com",
+				PhoneNumber: "+71111111111",
 			},
 		},
 	}
@@ -92,7 +86,10 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 
 	for _, tt := range tests {
 		convey.Convey(tt.name, t, func() {
-			err := repository.AddUser(ctx, tt.user)
+
+			user := entity.NewUser(tt.userCreds, tt.userContacts)
+
+			err := repository.AddUser(ctx, *user)
 
 			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
 
@@ -100,12 +97,12 @@ func TestPgUserRepo_AddUser(t *testing.T) {
 				user := entity.User{}
 
 				row := pgDb.QueryRow(ctx, `select id, login, password, email, phone_number from public.user
-							where login = $1`, tt.user.Creds.Login)
+							where login = $1`, tt.userCreds.Login)
 				err := row.Scan(&user.ID, &user.Creds.Login, &user.Creds.Password,
 					&user.Contacts.Email, &user.Contacts.PhoneNumber)
 
 				convey.So(err, convey.ShouldBeNil)
-				convey.ShouldResemble(user, tt.user)
+				convey.ShouldResemble(user, tt.userCreds)
 			}
 		})
 	}
@@ -146,13 +143,13 @@ func TestPgUserRepo_GetUserByLogin(t *testing.T) {
 		userLogin   entity.UserLogin
 	}{
 		{
-			name:        "Getting an existing user from the users table should pass without errors",
+			name:        "Getting an existing userCreds from the users table should pass without errors",
 			wantErr:     false,
 			expectEqual: true,
 			userLogin:   "user1",
 		},
 		{
-			name:        "Getting a non-existent user should throw an error",
+			name:        "Getting a non-existent userCreds should throw an error",
 			wantErr:     true,
 			expectEqual: false,
 			userLogin:   "userNotFound",
@@ -176,7 +173,7 @@ func TestPgUserRepo_GetUserByLogin(t *testing.T) {
 
 func RunPgMigrations(cfgPg config.PG, v int64) error {
 	connStr := fmt.Sprintf(
-		"user=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
+		"userCreds=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
 		cfgPg.User, cfgPg.Password, cfgPg.Host, cfgPg.DbName, cfgPg.Port, "disable")
 
 	mdb, err := sql.Open("postgres", connStr)

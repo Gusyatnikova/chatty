@@ -39,6 +39,9 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "User operations"
                 ],
@@ -56,7 +59,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserResponseBody"
+                        }
                     },
                     "400": {
                         "description": "Request body is incorrect or data validation have failed"
@@ -94,7 +100,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/RegisterResponseBody"
+                            "$ref": "#/definitions/UserResponseBody"
                         }
                     },
                     "400": {
@@ -105,6 +111,62 @@ const docTemplate = `{
                     },
                     "415": {
                         "description": "Content-Type application/json is missing"
+                    }
+                }
+            }
+        },
+        "/user/{login}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User operations"
+                ],
+                "summary": "Return information about user based on login param",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User's login",
+                        "name": "login",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserResponseBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Data validation have failed"
+                    },
+                    "404": {
+                        "description": "User with the specified login is not exists"
+                    }
+                }
+            }
+        },
+        "/whoami": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User operations"
+                ],
+                "summary": "Return information about user based on jwt token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserResponseBody"
+                        }
+                    },
+                    "404": {
+                        "description": "User is not exists"
                     }
                 }
             }
@@ -145,7 +207,7 @@ const docTemplate = `{
                 }
             }
         },
-        "RegisterResponseBody": {
+        "UserResponseBody": {
             "type": "object",
             "properties": {
                 "email": {
