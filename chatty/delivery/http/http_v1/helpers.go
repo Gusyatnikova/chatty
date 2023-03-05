@@ -1,6 +1,7 @@
 package http_v1
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -27,7 +28,7 @@ func isRequestBodyIsJSON(eCtx echo.Context) bool {
 func (e *ServerHandler) setAccessToken(rw http.ResponseWriter, token string, expAt time.Time) {
 	jwtCfg := e.jwtManager.GetConfig()
 
-	rw.Header().Set(jwtCfg.AccessTokenHeaderName, "Bearer "+token)
+	rw.Header().Set(jwtCfg.AccessTokenHeaderName, fmt.Sprintf("%s %s", jwtCfg.AuthScheme, token))
 
 	c := &http.Cookie{
 		Name:     jwtCfg.AccessTokenCookieName,
