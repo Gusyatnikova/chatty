@@ -1,7 +1,9 @@
 package http_v1
 
 import (
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,8 +23,18 @@ func isRequestBodyIsJSON(eCtx echo.Context) bool {
 	return false
 }
 
-//writeAuthBearerHeader set Authorization header for response in eCtx
-//to value "Bearer {token}"
-func writeAuthBearerHeader(eCtx echo.Context, token string) {
-	eCtx.Response().Header().Set("Authorization", "Bearer "+token)
+//setAccessToken set Authorization header to "Bearer {token}" and accessToken cookie value to {token}
+func (e *ServerHandler) setAccessToken(rw http.ResponseWriter, token string, expAt time.Time) {
+	jwtCfg := e.jwtManager.GetConfig()
+
+	rw.Header().Set(jwtCfg.AccessTokenHeaderName, "Bearer "+token)
+
+	c := &http.Cookie{
+		Name:     jwtCfg.AccessTokenCookieName,
+		Value:    token,
+		Expires:  expAt,
+		HttpOnly: true,
+	}
+
+	http.SetCookie(rw, c)
 }

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,10 +23,14 @@ func JWTHandlerMiddleware(cfg config.JWT) echo.MiddlewareFunc {
 	mw.ErrJWTMissing.Message = delivery.ErrUnauthorizied.Error()
 	mw.ErrJWTMissing.Code = http.StatusUnauthorized
 
+	tokenLookup := fmt.Sprintf("cookie:%s,header:%s:%s ",
+		cfg.AccessTokenCookieName, cfg.AccessTokenHeaderName, cfg.AuthScheme)
+
 	return mw.JWTWithConfig(mw.JWTConfig{
 		SigningKey:    []byte(cfg.Sign),
 		SigningMethod: chattyjwt.SigningMethod.Name,
 		Skipper:       skipAuth,
+		TokenLookup:   tokenLookup,
 	})
 }
 
