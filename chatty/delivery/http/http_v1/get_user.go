@@ -68,7 +68,7 @@ func (e *ServerHandler) getToken(r *http.Request) string {
 		return atCookie.Value
 	}
 
-	authScheme := "Bearer"
+	authScheme := jwtConfig.AuthScheme
 	authHeader := r.Header.Get(jwtConfig.AccessTokenHeaderName)
 
 	headerParts := strings.Split(authHeader, authScheme)
