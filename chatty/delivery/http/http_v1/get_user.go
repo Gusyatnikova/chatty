@@ -62,9 +62,14 @@ func (e *ServerHandler) GetUserByToken(eCtx echo.Context) error {
 }
 
 func (e *ServerHandler) getToken(r *http.Request) string {
-	authScheme := "Bearer"
+	jwtConfig := e.jwtManager.GetConfig()
 
-	authHeader := r.Header.Get("Authorization")
+	if atCookie, err := r.Cookie(jwtConfig.AccessTokenCookieName); err == nil {
+		return atCookie.Value
+	}
+
+	authScheme := "Bearer"
+	authHeader := r.Header.Get(jwtConfig.AccessTokenHeaderName)
 
 	headerParts := strings.Split(authHeader, authScheme)
 	tokenStr := strings.TrimSpace(headerParts[1])
