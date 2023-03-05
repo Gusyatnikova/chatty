@@ -1,17 +1,23 @@
 package jwt
 
 import (
-	"chatty/chatty/entity"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/pkg/errors"
+
+	"chatty/chatty/entity"
 )
 
-func (e *JWTManager) Generate(user entity.User) (string, error) {
+func (e *JWTManager) GenerateAccessToken(user entity.User) (string, time.Time, error) {
+	expAt := time.Now().Add(time.Second * time.Duration(e.cfg.TTL))
+
 	token := jwt.NewWithClaims(SigningMethod, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Second * time.Duration(e.cfg.TTL)).Unix(),
+		ExpiresAt: expAt.Unix(),
 		Subject:   string(user.GetID()),
 	})
 
-	return token.SignedString([]byte(e.cfg.Sign))
+	ss, err := token.SignedString([]byte(e.cfg.Sign))
+
+	return ss, expAt, errors.Wrap(err, "err in JWTManager.GenerateAccessToken():")
 }

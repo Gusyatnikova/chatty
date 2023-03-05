@@ -1,6 +1,13 @@
 package jwt
 
+import (
+	"time"
+
+	"chatty/chatty/app/config"
+)
+
 type TokenManager interface {
-	Generate(sub string) (string, error)
+	GenerateAccessToken(sub string) (string, time.Time, error)
 	ExtractSub(token string) (string, error)
+	GetConfig() config.JWT
 }
