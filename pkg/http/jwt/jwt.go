@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"chatty/chatty/app/config"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var SigningMethod = jwt.SigningMethodHS256
