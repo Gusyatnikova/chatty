@@ -91,11 +91,12 @@ func TestJWT(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 
+			token, expAt, _ := jwtManager.GenerateAccessToken(*baseUser)
 			if tc.addTokenToCookie {
-				addCookie(req, JWTCfg, jwtManager, *baseUser)
+				addCookie(req, JWTCfg, token, expAt)
 			}
 			if tc.addTokenToHeader {
-				addHeader(req, JWTCfg, jwtManager, *baseUser)
+				addHeader(req, JWTCfg, token)
 			}
 
 			res := httptest.NewRecorder()
@@ -109,9 +110,7 @@ func TestJWT(t *testing.T) {
 	}
 }
 
-func addCookie(req *http.Request, cfg config.JWT, jm jwtmanager.TokenManager, usr entity.User) {
-	token, expAt, _ := jm.GenerateAccessToken(usr)
-
+func addCookie(req *http.Request, cfg config.JWT, token string, expAt time.Time) {
 	accessTokenCookie := &http.Cookie{
 		Name:     cfg.AccessTokenCookieName,
 		Value:    token,
@@ -121,8 +120,6 @@ func addCookie(req *http.Request, cfg config.JWT, jm jwtmanager.TokenManager, us
 	req.AddCookie(accessTokenCookie)
 }
 
-func addHeader(req *http.Request, cfg config.JWT, jm jwtmanager.TokenManager, usr entity.User) {
-	token, _, _ := jm.GenerateAccessToken(usr)
-
+func addHeader(req *http.Request, cfg config.JWT, token string) {
 	req.Header.Set(cfg.AccessTokenHeaderName, fmt.Sprintf("%s %s", cfg.AuthScheme, token))
 }
