@@ -29,8 +29,11 @@ type (
 	}
 
 	JWT struct {
-		Sign string `env-required:"true" env:"JWT_SECRET"`
-		TTL  int64  `env-required:"true" env:"JWT_TTL_SEC"`
+		Sign                  string `env-required:"true" env:"JWT_SECRET"`
+		TTL                   int64  `env-required:"true" env:"JWT_TTL_SEC"`
+		AccessTokenCookieName string `env-required:"true" env:"ACCESS_TOKEN_COOKIE_NAME"`
+		AccessTokenHeaderName string `env-required:"true" env:"ACCESS_TOKEN_HEADER_NAME"`
+		AuthScheme            string `env-required:"true" env:"AUTH_SCHEME"`
 	}
 
 	Password struct {
