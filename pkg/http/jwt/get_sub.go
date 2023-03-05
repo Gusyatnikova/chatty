@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	gojwt "github.com/golang-jwt/jwt/v4"
+	gojwt "github.com/golang-jwt/jwt"
 	"github.com/pkg/errors"
 )
 
