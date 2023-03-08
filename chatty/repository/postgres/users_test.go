@@ -173,7 +173,7 @@ func TestPgUserRepo_GetUserByLogin(t *testing.T) {
 
 func RunPgMigrations(cfgPg config.PG, v int64) error {
 	connStr := fmt.Sprintf(
-		"userCreds=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
+		"user=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
 		cfgPg.User, cfgPg.Password, cfgPg.Host, cfgPg.DbName, cfgPg.Port, "disable")
 
 	mdb, err := sql.Open("postgres", connStr)

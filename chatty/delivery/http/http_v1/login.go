@@ -44,12 +44,12 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 		return nil
 	}
 
-	jwtToken, err := e.jwtManager.GenerateJwtToken(user)
+	jwtToken, expTime, err := e.jwtManager.GenerateAccessToken(user)
 	if err != nil {
 		return err
 	}
 
-	writeAuthBearerHeader(eCtx, jwtToken)
+	e.setAccessToken(eCtx.Response(), jwtToken, expTime)
 
 	return eCtx.JSON(http.StatusOK, userToRespBody(user))
 }

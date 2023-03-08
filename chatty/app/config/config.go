@@ -15,31 +15,31 @@ type (
 	}
 
 	HTTP struct {
-		Port string `env-required:"true" env:"HTTP_PORT"`
-		Host string `env-required:"true" env:"HTTP_HOST"`
+		Port string `env:"HTTP_PORT"`
+		Host string `env:"HTTP_HOST"`
 	}
 
 	PG struct {
-		DbName   string `env-required:"true" env:"POSTGRES_DB"`
-		User     string `env-required:"true" env:"POSTGRES_USER"`
-		Password string `env-required:"true" env:"POSTGRES_PASSWORD"`
-		Host     string `env-required:"true" env:"POSTGRES_HOST"`
-		Port     int    `env-required:"true" env:"POSTGRES_PORT"`
-		PoolMax  int    `env-required:"true" env:"POSTGRES_POOL_MAX"`
+		DbName   string `env:"POSTGRES_DB"`
+		User     string `env:"POSTGRES_USER"`
+		Password string `env:"POSTGRES_PASSWORD"`
+		Host     string `env:"POSTGRES_HOST"`
+		Port     int    `env:"POSTGRES_PORT"`
+		PoolMax  int    `env:"POSTGRES_POOL_MAX"`
 	}
 
 	JWT struct {
-		Sign string `env-required:"true" env:"JWT_SECRET"`
-		TTL  int64  `env-required:"true" env:"JWT_TTL_SEC"`
+		Sign string `env:"JWT_SECRET"`
+		TTL  int64  `env:"JWT_TTL_SEC"`
 	}
 
 	Password struct {
-		Secret      string `env-required:"true" env:"PASSWORD_SECRET"`
-		Memory      uint32 `env-required:"true" env:"PASSWORD_MEMORY"`
-		Iterations  uint32 `env-required:"true" env:"PASSWORD_ITERATIONS"`
-		SaltLength  uint32 `env-required:"true" env:"PASSWORD_SALT_LENGTH"`
-		KeyLength   uint32 `env-required:"true" env:"PASSWORD_KEY_LENGTH"`
-		Parallelism uint8  `env-required:"true" env:"PASSWORD_PARALLELISM"`
+		Secret      string `env:"PASSWORD_SECRET"`
+		Memory      uint32 `env:"PASSWORD_MEMORY"`
+		Iterations  uint32 `env:"PASSWORD_ITERATIONS"`
+		SaltLength  uint32 `env:"PASSWORD_SALT_LENGTH"`
+		KeyLength   uint32 `env:"PASSWORD_KEY_LENGTH"`
+		Parallelism uint8  `env:"PASSWORD_PARALLELISM"`
 	}
 )
 
