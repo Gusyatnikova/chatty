@@ -4,7 +4,7 @@
 
 create table if not exists public.user
 (
-    id           varchar                       primary key,
+    id           character(26)               primary key,
     login        varchar                     not null unique,
     password     varchar                     not null,
     email        varchar                     not null unique,

@@ -50,6 +50,8 @@ func NewDockerResource(cfg *DockerConfig) (*DockerResource, error) {
 			Env:        cfg.Env,
 			Links:      cfg.Links,
 		}, func(hostConfig *docker.HostConfig) {
+			hostConfig.AutoRemove = true
+			hostConfig.RestartPolicy = docker.RestartPolicy{Name: "no"}
 			hostConfig.PortBindings = portBinding
 		})
 	if err != nil {
