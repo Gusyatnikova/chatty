@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,46 +27,48 @@ func TestJWT(t *testing.T) {
 
 	testCases := []struct {
 		name               string
+		expectedStatusCode int
 		TTL                int64
-		Delay              time.Duration
+		genInvalidToken    bool
 		addTokenToCookie   bool
 		addTokenToHeader   bool
-		expectedStatusCode int
 	}{
 		{
 			name:               "ok, token is found in cookie",
 			TTL:                2,
-			Delay:              0,
 			addTokenToCookie:   true,
 			addTokenToHeader:   false,
 			expectedStatusCode: http.StatusOK,
 		}, {
 			name:               "ok, token is found in header",
 			TTL:                2,
-			Delay:              0,
 			addTokenToCookie:   false,
 			addTokenToHeader:   true,
 			expectedStatusCode: http.StatusOK,
 		}, {
 			name:               "ok, token is found in both header and cookie",
 			TTL:                2,
-			Delay:              0,
 			addTokenToCookie:   true,
 			addTokenToHeader:   true,
 			expectedStatusCode: http.StatusOK,
 		}, {
 			name:               "nok, token is not found in both cookie and header",
 			TTL:                2,
-			Delay:              0,
 			addTokenToCookie:   false,
 			addTokenToHeader:   false,
 			expectedStatusCode: http.StatusUnauthorized,
 		}, {
 			name:               "nok, token is expired",
-			TTL:                1,
-			Delay:              2,
+			TTL:                -1,
 			addTokenToCookie:   true,
 			addTokenToHeader:   true,
+			expectedStatusCode: http.StatusUnauthorized,
+		}, {
+			name:               "nok, token is invalid",
+			TTL:                1,
+			addTokenToCookie:   true,
+			addTokenToHeader:   true,
+			genInvalidToken:    true,
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 	}
@@ -92,6 +95,9 @@ func TestJWT(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 
 			token, expAt, _ := jwtManager.GenerateAccessToken(*baseUser)
+			if tc.genInvalidToken {
+				token = randString(len(token))
+			}
 			if tc.addTokenToCookie {
 				addCookie(req, JWTCfg, token, expAt)
 			}
@@ -100,8 +106,6 @@ func TestJWT(t *testing.T) {
 			}
 
 			res := httptest.NewRecorder()
-
-			time.Sleep(time.Second * tc.Delay)
 
 			e.ServeHTTP(res, req)
 
@@ -122,4 +126,17 @@ func addCookie(req *http.Request, cfg config.JWT, token string, expAt time.Time)
 
 func addHeader(req *http.Request, cfg config.JWT, token string) {
 	req.Header.Set(cfg.AccessTokenHeaderName, fmt.Sprintf("%s %s", cfg.AuthScheme, token))
+}
+
+func randString(length int) string {
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789."
+
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+
+	return string(b)
 }
