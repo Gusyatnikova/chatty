@@ -12,6 +12,12 @@ import (
 	chattyjwt "chatty/pkg/http/jwt"
 )
 
+const (
+	AccessTokenCookieName = "access-token"
+	AccessTokenHeaderName = "Authorization"
+	AuthScheme            = "Bearer"
+)
+
 var whiteListPaths = []string{
 	"/login",
 	"/register",
@@ -24,7 +30,7 @@ func JWTHandlerMiddleware(cfg config.JWT) echo.MiddlewareFunc {
 	mw.ErrJWTMissing.Code = http.StatusUnauthorized
 
 	tokenLookup := fmt.Sprintf("cookie:%s,header:%s:%s ",
-		cfg.AccessTokenCookieName, cfg.AccessTokenHeaderName, cfg.AuthScheme)
+		AccessTokenCookieName, AccessTokenHeaderName, AuthScheme)
 
 	return mw.JWTWithConfig(mw.JWTConfig{
 		SigningKey:    []byte(cfg.Sign),

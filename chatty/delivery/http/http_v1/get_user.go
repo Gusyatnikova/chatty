@@ -1,13 +1,16 @@
 package http_v1
 
 import (
-	"chatty/chatty/delivery"
-	"chatty/chatty/entity"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"net/http"
 	"strings"
+
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
+
+	"chatty/chatty/delivery"
+	mw "chatty/chatty/delivery/http/http_v1/middleware"
+	"chatty/chatty/entity"
 )
 
 // GetUserByLogin godoc
@@ -62,14 +65,12 @@ func (e *ServerHandler) GetUserByToken(eCtx echo.Context) error {
 }
 
 func (e *ServerHandler) getToken(r *http.Request) string {
-	jwtConfig := e.jwtManager.GetConfig()
-
-	if atCookie, err := r.Cookie(jwtConfig.AccessTokenCookieName); err == nil {
+	if atCookie, err := r.Cookie(mw.AccessTokenCookieName); err == nil {
 		return atCookie.Value
 	}
 
-	authScheme := jwtConfig.AuthScheme
-	authHeader := r.Header.Get(jwtConfig.AccessTokenHeaderName)
+	authScheme := mw.AuthScheme
+	authHeader := r.Header.Get(mw.AccessTokenHeaderName)
 
 	headerParts := strings.Split(authHeader, authScheme)
 	if len(headerParts) < 2 {

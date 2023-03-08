@@ -18,11 +18,8 @@ import (
 
 func TestJWT(t *testing.T) {
 	JWTCfg := config.JWT{
-		Sign:                  "secret",
-		TTL:                   2,
-		AccessTokenCookieName: "access-token",
-		AccessTokenHeaderName: "Authorization",
-		AuthScheme:            "Bearer ",
+		Sign: "secret",
+		TTL:  2,
 	}
 
 	testCases := []struct {
@@ -116,7 +113,7 @@ func TestJWT(t *testing.T) {
 
 func addCookie(req *http.Request, cfg config.JWT, token string, expAt time.Time) {
 	accessTokenCookie := &http.Cookie{
-		Name:     cfg.AccessTokenCookieName,
+		Name:     AccessTokenCookieName,
 		Value:    token,
 		Expires:  expAt,
 		HttpOnly: true,
@@ -125,7 +122,7 @@ func addCookie(req *http.Request, cfg config.JWT, token string, expAt time.Time)
 }
 
 func addHeader(req *http.Request, cfg config.JWT, token string) {
-	req.Header.Set(cfg.AccessTokenHeaderName, fmt.Sprintf("%s %s", cfg.AuthScheme, token))
+	req.Header.Set(AccessTokenHeaderName, fmt.Sprintf("%s %s", AuthScheme, token))
 }
 
 func randString(length int) string {

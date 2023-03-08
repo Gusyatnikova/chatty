@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+
+	mw "chatty/chatty/delivery/http/http_v1/middleware"
 )
 
 //isRequestBodyIsJSON returns true if header Contain-type with value application/json are in the request
@@ -26,12 +28,10 @@ func isRequestBodyIsJSON(eCtx echo.Context) bool {
 
 //setAccessToken set Authorization header to "Bearer {token}" and accessToken cookie value to {token}
 func (e *ServerHandler) setAccessToken(rw http.ResponseWriter, token string, expAt time.Time) {
-	jwtCfg := e.jwtManager.GetConfig()
-
-	rw.Header().Set(jwtCfg.AccessTokenHeaderName, fmt.Sprintf("%s %s", jwtCfg.AuthScheme, token))
+	rw.Header().Set(mw.AccessTokenHeaderName, fmt.Sprintf("%s %s", mw.AuthScheme, token))
 
 	c := &http.Cookie{
-		Name:     jwtCfg.AccessTokenCookieName,
+		Name:     mw.AccessTokenCookieName,
 		Value:    token,
 		Expires:  expAt,
 		HttpOnly: true,

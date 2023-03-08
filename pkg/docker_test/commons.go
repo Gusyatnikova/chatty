@@ -5,9 +5,6 @@ import (
 )
 
 func InitEnv() {
-	os.Setenv("ACCESS_TOKEN_COOKIE_NAME", "access-token")
-	os.Setenv("ACCESS_TOKEN_HEADER_NAME", "Authorization")
-	os.Setenv("AUTH_SCHEME", "Bearer")
 	os.Setenv("HTTP_HOST", "0.0.0.0")
 	os.Setenv("HTTP_PORT", "8888")
 	os.Setenv("JWT_SECRET", "gFd4OE87FMVgd1BYcTVXVG")
