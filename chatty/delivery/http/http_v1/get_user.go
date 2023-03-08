@@ -72,7 +72,9 @@ func (e *ServerHandler) getToken(r *http.Request) string {
 	authHeader := r.Header.Get(jwtConfig.AccessTokenHeaderName)
 
 	headerParts := strings.Split(authHeader, authScheme)
-	tokenStr := strings.TrimSpace(headerParts[1])
+	if len(headerParts) < 2 {
+		return ""
+	}
 
-	return tokenStr
+	return strings.TrimSpace(headerParts[1])
 }
