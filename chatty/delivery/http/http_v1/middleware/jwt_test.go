@@ -16,62 +16,46 @@ import (
 	jwtmanager "chatty/pkg/http/jwt"
 )
 
-type tokenParams struct {
-	AddToCookie bool
-	AddToHeader bool
-	IsInvalid   bool
-}
-
 func TestJWT(t *testing.T) {
 	testCases := []struct {
 		name               string
 		expectedStatusCode int
 		TTL                int64
-		tp                 tokenParams
+		addToCookie        bool
+		addToHeader        bool
+		isInvalid          bool
 	}{
 		{
-			name: "ok, token is found in cookie",
-			tp: tokenParams{
-				AddToCookie: true,
-				AddToHeader: false,
-			},
+			name:               "ok, token is found in cookie",
+			addToCookie:        true,
+			addToHeader:        false,
 			expectedStatusCode: http.StatusOK,
 		}, {
-			name: "ok, token is found in header",
-			tp: tokenParams{
-				AddToCookie: false,
-				AddToHeader: true,
-			},
+			name:               "ok, token is found in header",
+			addToCookie:        false,
+			addToHeader:        true,
 			expectedStatusCode: http.StatusOK,
 		}, {
-			name: "ok, token is found in both header and cookie",
-			tp: tokenParams{
-				AddToCookie: true,
-				AddToHeader: true,
-			},
+			name:               "ok, token is found in both header and cookie",
+			addToCookie:        true,
+			addToHeader:        true,
 			expectedStatusCode: http.StatusOK,
 		}, {
-			name: "nok, token is not found in both cookie and header",
-			tp: tokenParams{
-				AddToCookie: false,
-				AddToHeader: false,
-			},
+			name:               "nok, token is not found in both cookie and header",
+			addToCookie:        false,
+			addToHeader:        false,
 			expectedStatusCode: http.StatusUnauthorized,
 		}, {
-			name: "nok, token is expired",
-			TTL:  -1,
-			tp: tokenParams{
-				AddToCookie: true,
-				AddToHeader: true,
-			},
+			name:               "nok, token is expired",
+			TTL:                -1,
+			addToCookie:        true,
+			addToHeader:        true,
 			expectedStatusCode: http.StatusUnauthorized,
 		}, {
-			name: "nok, token is invalid",
-			tp: tokenParams{
-				AddToCookie: true,
-				AddToHeader: true,
-				IsInvalid:   true,
-			},
+			name:               "nok, token is invalid",
+			addToCookie:        true,
+			addToHeader:        true,
+			isInvalid:          true,
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 	}
@@ -92,8 +76,9 @@ func TestJWT(t *testing.T) {
 
 			JWTCfg.TTL = tc.TTL
 			jwtManager := jwtmanager.NewJWTManager(JWTCfg)
+			token, expAt := generateToken(jwtManager, *baseUser, tc.isInvalid)
 
-			req := newRequest(tc.tp, jwtManager, baseUser)
+			req := newRequest(token, expAt, tc.addToCookie, tc.addToHeader)
 			res := httptest.NewRecorder()
 
 			e.ServeHTTP(res, req)
@@ -103,15 +88,13 @@ func TestJWT(t *testing.T) {
 	}
 }
 
-func newRequest(tp tokenParams, tokenManager jwtmanager.TokenManager, user *entity.User) *http.Request {
+func newRequest(token string, expAt time.Time, addToCookie, addToHeader bool) *http.Request {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 
-	token, expAt := generateToken(tokenManager, *user, tp.IsInvalid)
-
-	if tp.AddToCookie {
+	if addToCookie {
 		addCookie(req, token, expAt)
 	}
-	if tp.AddToHeader {
+	if addToHeader {
 		addHeader(req, token)
 	}
 
