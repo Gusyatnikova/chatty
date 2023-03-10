@@ -17,55 +17,45 @@ import (
 )
 
 func TestJWT(t *testing.T) {
-	JWTCfg := config.JWT{
-		Sign: "secret",
-		TTL:  2,
-	}
-
 	testCases := []struct {
 		name               string
 		expectedStatusCode int
 		TTL                int64
-		genInvalidToken    bool
-		addTokenToCookie   bool
-		addTokenToHeader   bool
+		addToCookie        bool
+		addToHeader        bool
+		isInvalid          bool
 	}{
 		{
 			name:               "ok, token is found in cookie",
-			TTL:                2,
-			addTokenToCookie:   true,
-			addTokenToHeader:   false,
+			addToCookie:        true,
+			addToHeader:        false,
 			expectedStatusCode: http.StatusOK,
 		}, {
 			name:               "ok, token is found in header",
-			TTL:                2,
-			addTokenToCookie:   false,
-			addTokenToHeader:   true,
+			addToCookie:        false,
+			addToHeader:        true,
 			expectedStatusCode: http.StatusOK,
 		}, {
 			name:               "ok, token is found in both header and cookie",
-			TTL:                2,
-			addTokenToCookie:   true,
-			addTokenToHeader:   true,
+			addToCookie:        true,
+			addToHeader:        true,
 			expectedStatusCode: http.StatusOK,
 		}, {
 			name:               "nok, token is not found in both cookie and header",
-			TTL:                2,
-			addTokenToCookie:   false,
-			addTokenToHeader:   false,
+			addToCookie:        false,
+			addToHeader:        false,
 			expectedStatusCode: http.StatusUnauthorized,
 		}, {
 			name:               "nok, token is expired",
 			TTL:                -1,
-			addTokenToCookie:   true,
-			addTokenToHeader:   true,
+			addToCookie:        true,
+			addToHeader:        true,
 			expectedStatusCode: http.StatusUnauthorized,
 		}, {
 			name:               "nok, token is invalid",
-			TTL:                1,
-			addTokenToCookie:   true,
-			addTokenToHeader:   true,
-			genInvalidToken:    true,
+			addToCookie:        true,
+			addToHeader:        true,
+			isInvalid:          true,
 			expectedStatusCode: http.StatusUnauthorized,
 		},
 	}
@@ -75,33 +65,19 @@ func TestJWT(t *testing.T) {
 		Password: "12345",
 	}, entity.UserContacts{})
 
-	e := echo.New()
-
-	e.GET("/", func(c echo.Context) error {
-		return c.NoContent(http.StatusOK)
-	})
+	JWTCfg := config.JWT{
+		Sign: "secret",
+		TTL:  2,
+	}
+	e := initEcho(&JWTCfg)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
 			JWTCfg.TTL = tc.TTL
-			e.Use(JWTHandlerMiddleware(JWTCfg))
+			token, expAt := generateToken(JWTCfg, *baseUser, tc.isInvalid)
 
-			jwtManager := jwtmanager.NewJWTManager(JWTCfg)
-
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
-
-			token, expAt, _ := jwtManager.GenerateAccessToken(*baseUser)
-			if tc.genInvalidToken {
-				token = randString(len(token))
-			}
-			if tc.addTokenToCookie {
-				addCookie(req, JWTCfg, token, expAt)
-			}
-			if tc.addTokenToHeader {
-				addHeader(req, JWTCfg, token)
-			}
-
+			req := newRequest(token, expAt, tc.addToCookie, tc.addToHeader)
 			res := httptest.NewRecorder()
 
 			e.ServeHTTP(res, req)
@@ -111,7 +87,43 @@ func TestJWT(t *testing.T) {
 	}
 }
 
-func addCookie(req *http.Request, cfg config.JWT, token string, expAt time.Time) {
+func newRequest(token string, expAt time.Time, addToCookie, addToHeader bool) *http.Request {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+
+	if addToCookie {
+		addCookie(req, token, expAt)
+	}
+	if addToHeader {
+		addHeader(req, token)
+	}
+
+	return req
+}
+
+func initEcho(jwtCfg *config.JWT) *echo.Echo {
+	e := echo.New()
+
+	e.Use(JWTHandlerMiddleware(*jwtCfg))
+
+	e.GET("/", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
+	return e
+}
+
+func generateToken(JWTCfg config.JWT, user entity.User, isInvalid bool) (string, time.Time) {
+	manager := jwtmanager.NewJWTManager(JWTCfg)
+
+	token, expAt, _ := manager.GenerateAccessToken(user)
+	if isInvalid {
+		token = randString(len(token))
+	}
+
+	return token, expAt
+}
+
+func addCookie(req *http.Request, token string, expAt time.Time) {
 	accessTokenCookie := &http.Cookie{
 		Name:     AccessTokenCookieName,
 		Value:    token,
@@ -121,7 +133,7 @@ func addCookie(req *http.Request, cfg config.JWT, token string, expAt time.Time)
 	req.AddCookie(accessTokenCookie)
 }
 
-func addHeader(req *http.Request, cfg config.JWT, token string) {
+func addHeader(req *http.Request, token string) {
 	req.Header.Set(AccessTokenHeaderName, fmt.Sprintf("%s %s", AuthScheme, token))
 }
 
