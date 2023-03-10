@@ -75,8 +75,7 @@ func TestJWT(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 
 			JWTCfg.TTL = tc.TTL
-			jwtManager := jwtmanager.NewJWTManager(JWTCfg)
-			token, expAt := generateToken(jwtManager, *baseUser, tc.isInvalid)
+			token, expAt := generateToken(JWTCfg, *baseUser, tc.isInvalid)
 
 			req := newRequest(token, expAt, tc.addToCookie, tc.addToHeader)
 			res := httptest.NewRecorder()
@@ -113,7 +112,9 @@ func initEcho(jwtCfg *config.JWT) *echo.Echo {
 	return e
 }
 
-func generateToken(manager jwtmanager.TokenManager, user entity.User, isInvalid bool) (string, time.Time) {
+func generateToken(JWTCfg config.JWT, user entity.User, isInvalid bool) (string, time.Time) {
+	manager := jwtmanager.NewJWTManager(JWTCfg)
+
 	token, expAt, _ := manager.GenerateAccessToken(user)
 	if isInvalid {
 		token = randString(len(token))
