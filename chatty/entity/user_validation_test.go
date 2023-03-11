@@ -3,10 +3,62 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/oklog/ulid/v2"
+	"github.com/stretchr/testify/assert"
 
 	"chatty/chatty/entity"
 )
+
+func TestUser_validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+		user    entity.User
+	}{
+		{
+			name:    "ok, user is valid",
+			wantErr: false,
+			user: entity.User{
+				ID: ulid.Make(),
+				Creds: entity.UserCreds{
+					Login:    "TestLogin1",
+					Password: "password",
+				},
+				Contacts: entity.UserContacts{
+					Email:       "test@testmail.com",
+					PhoneNumber: "+71111111111",
+				},
+			},
+		},
+		{
+			name:    "nok, user creds are empty",
+			wantErr: true,
+			user: entity.User{
+				ID: ulid.Make(),
+				Creds: entity.UserCreds{
+					Login:    "",
+					Password: "",
+				},
+				Contacts: entity.UserContacts{
+					Email:       "test@testmail.com",
+					PhoneNumber: "+71111111111",
+				},
+			},
+		}, {
+			name:    "nok, creds and contacts are nil",
+			wantErr: true,
+			user:    entity.User{},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.user.Validate()
+
+			assert.Equal(t, err != nil, tc.wantErr)
+		})
+	}
+}
 
 func TestUserCreds_Validate(t *testing.T) {
 	tests := []struct {
@@ -73,9 +125,9 @@ func TestUserCreds_Validate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		convey.Convey(tt.name, t, func() {
+		t.Run(tt.name, func(t *testing.T) {
 			err := tt.userCreds.Validate()
-			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
+			assert.Equal(t, err != nil, tt.wantErr)
 		})
 	}
 }
@@ -121,9 +173,9 @@ func TestUserContacts_Validate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		convey.Convey(tt.name, t, func() {
+		t.Run(tt.name, func(t *testing.T) {
 			err := tt.userContacts.Validate()
-			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
+			assert.Equal(t, err != nil, tt.wantErr)
 		})
 	}
 }

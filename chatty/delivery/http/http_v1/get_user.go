@@ -25,7 +25,7 @@ import (
 func (e *ServerHandler) GetUserByLogin(eCtx echo.Context) error {
 	userLogin := entity.UserLogin(eCtx.Param("login"))
 
-	if err := (&userLogin).Validate(); err != nil {
+	if err := userLogin.Validate(); err != nil {
 		return err
 	}
 
