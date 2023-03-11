@@ -24,7 +24,7 @@ var ErrorHandlerMiddleware = func(next echo.HandlerFunc) echo.HandlerFunc {
 
 //errResponse log error and return new http error with custom status code and message
 func getHttpErr(err error) error {
-	log.Error().Msg(errors.Wrap(err, "Err in ServerHandler: ").Error())
+	log.Error().Msg(errors.Wrap(err, "err in ServerHandler: ").Error())
 
 	return echo.NewHTTPError(errToHttpErr(err))
 }
@@ -58,7 +58,6 @@ func errToHttpErr(err error) (int, interface{}) {
 		return http.StatusConflict, usecase.ErrUserDuplication.Error()
 	}
 	if errors.Is(err, usecase.ErrDataDuplication) {
-		err = errors.Unwrap(err)
 		return http.StatusConflict, usecase.ErrDataDuplication.Error()
 	}
 	if errors.Is(err, usecase.ErrUserUnauthorized) {

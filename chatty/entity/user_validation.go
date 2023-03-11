@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	LoginValidationRegexp    = regexp.MustCompile("^[A-Za-z_]+[0-9]+$")
-	PasswordValidationRegexp = regexp.MustCompile("^[A-Za-z0-9!@#$%^&*_+\\-=\\()]+$")
+	LoginValidationRegexp    = regexp.MustCompile(`^[A-Za-z_]+[0-9]+$`)
+	PasswordValidationRegexp = regexp.MustCompile(`^[A-Za-z0-9!@#$%^&*_+\-=()]+$`)
 )
 
 func (e *User) Validate() error {
