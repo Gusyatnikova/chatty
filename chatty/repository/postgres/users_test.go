@@ -152,7 +152,7 @@ func TestPgUserRepo_GetUserByLogin(t *testing.T) {
 			name:        "Getting a non-existent userCreds should throw an error",
 			wantErr:     true,
 			expectEqual: false,
-			userLogin:   "userNotFound",
+			userLogin:   "userNotFoundLogin",
 		},
 	}
 
