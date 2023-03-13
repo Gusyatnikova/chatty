@@ -31,7 +31,7 @@ func (e *ServerHandler) Login(eCtx echo.Context) error {
 	}
 
 	userCreds := loginReqBodyToUserCreds(loginBody)
-	if err := (&userCreds).Validate(); err != nil {
+	if err := userCreds.Validate(); err != nil {
 		return err
 	}
 

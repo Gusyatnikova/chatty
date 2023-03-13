@@ -19,7 +19,7 @@ func (e *pgUserRepo) AddUser(ctx context.Context, user entity.User) error {
 		_, err := tx.Exec(ctx, AddUserSqlCmd,
 			user.GetID(), user.Creds.Login, user.Creds.Password,
 			user.Contacts.Email, user.Contacts.PhoneNumber)
-		return errors.Wrap(err, "Err in pgUserRepo.AddUser.Exec()")
+		return errors.Wrap(err, "err in pgUserRepo.AddUser.Exec()")
 	}
 
 	return repository.ErrorHandling(e.RunTx(ctx, addUserFn))

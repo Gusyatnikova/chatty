@@ -25,7 +25,7 @@ import (
 func (e *ServerHandler) GetUserByLogin(eCtx echo.Context) error {
 	userLogin := entity.UserLogin(eCtx.Param("login"))
 
-	if err := (&userLogin).Validate(); err != nil {
+	if err := userLogin.Validate(); err != nil {
 		return err
 	}
 
@@ -54,9 +54,7 @@ func (e *ServerHandler) GetUserByToken(eCtx echo.Context) error {
 		return errors.Wrap(delivery.ErrBadRequest, fmt.Sprintf("%s.jwtManager.ExtractSub() with token %s", errMsg, token))
 	}
 
-	user := entity.User{}
-
-	user, err = e.uc.GetUserByID(eCtx.Request().Context(), entity.UserID(idStr))
+	user, err := e.uc.GetUserByID(eCtx.Request().Context(), entity.UserID(idStr))
 	if err != nil {
 		return err
 	}

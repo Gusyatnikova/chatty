@@ -24,7 +24,7 @@ func (e *pgUserRepo) GetUserByLogin(ctx context.Context, login entity.UserLogin)
 		return user, repository.ErrorHandling(err)
 	}
 
-	return user, errors.Wrap(err, "Err in: pgUserRepo.GetUserByLogin.ScanUser(): ")
+	return user, errors.Wrap(err, "err in: pgUserRepo.GetUserByLogin.ScanUser(): ")
 }
 
 func (e *pgUserRepo) GetUserByID(ctx context.Context, id entity.UserID) (user entity.User, err error) {
@@ -34,7 +34,7 @@ func (e *pgUserRepo) GetUserByID(ctx context.Context, id entity.UserID) (user en
 		return user, repository.ErrorHandling(err)
 	}
 
-	return user, errors.Wrap(err, "Err in: pgUserRepo.GetUserByID.ScanUser(): ")
+	return user, errors.Wrap(err, "err in: pgUserRepo.GetUserByID(): ")
 }
 
 func (e *pgUserRepo) scanUser(row pgx.Row) (entity.User, error) {
@@ -49,10 +49,10 @@ func (e *pgUserRepo) scanUser(row pgx.Row) (entity.User, error) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return user, repository.ErrNotFound
 		}
-		return user, errors.Wrap(err, "Err in: pgUserRepo.ScanUser.Scan()")
+		return user, errors.Wrap(err, "err in: pgUserRepo.ScanUser.Scan()")
 	}
 
-	user.SetID(entity.UserID(idStr))
+	err = user.SetID(entity.UserID(idStr))
 
-	return user, nil
+	return user, errors.Wrap(err, "err in pgUserRepo.scanUser():")
 }

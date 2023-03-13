@@ -10,7 +10,6 @@ import (
 )
 
 func (e *chatUseCase) GetUserByLogin(ctx context.Context, login entity.UserLogin) (entity.User, error) {
-	user := entity.User{}
 	user, err := e.userRepo.GetUserByLogin(ctx, login)
 
 	if err != nil {
@@ -21,7 +20,6 @@ func (e *chatUseCase) GetUserByLogin(ctx context.Context, login entity.UserLogin
 }
 
 func (e *chatUseCase) GetUserByID(ctx context.Context, id entity.UserID) (entity.User, error) {
-	user := entity.User{}
 	user, err := e.userRepo.GetUserByID(ctx, id)
 
 	if err != nil {
