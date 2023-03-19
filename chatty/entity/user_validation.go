@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	LoginValidationRegexp    = regexp.MustCompile(`^[A-Za-z_]+[0-9]+$`)
+	LoginValidationRegexp    = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 	PasswordValidationRegexp = regexp.MustCompile(`^[A-Za-z0-9!@#$%^&*_+\-=()]+$`)
 )
 

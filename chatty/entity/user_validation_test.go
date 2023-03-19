@@ -75,6 +75,14 @@ func TestUserCreds_Validate(t *testing.T) {
 			},
 		},
 		{
+			name:    "Login with length between 1 and 256 and containing English letters only should be valid",
+			wantErr: false,
+			userCreds: entity.UserCreds{
+				Login:    "TestLogin",
+				Password: "password",
+			},
+		},
+		{
 			name:    "Login with zero length should not be valid",
 			wantErr: true,
 			userCreds: entity.UserCreds{
