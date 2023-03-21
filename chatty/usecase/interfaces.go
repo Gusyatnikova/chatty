@@ -6,6 +6,7 @@ import (
 	"chatty/chatty/entity"
 )
 
+//go:generate mockery --name ChatUseCase
 type ChatUseCase interface {
 	Register(context.Context, entity.User) error
 	Login(context.Context, entity.UserCreds) error
