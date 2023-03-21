@@ -25,19 +25,16 @@ import (
 func TestRegister(t *testing.T) {
 	testCases := []struct {
 		name         string
-		body         map[string]interface{}
-		mockUC       bool
-		mockJWT      bool
 		expectedErr  error
 		expectedUser entity.User
+		mockUC       bool
+		mockJWT      bool
 		errFromUC    error
+		reqBody      map[string]interface{}
 	}{
 		{
 			name:        "ok, successful registration",
 			expectedErr: nil,
-			errFromUC:   nil,
-			mockUC:      true,
-			mockJWT:     true,
 			expectedUser: entity.User{
 				Creds: entity.UserCreds{
 					Login:    "TestLogin",
@@ -48,39 +45,39 @@ func TestRegister(t *testing.T) {
 					PhoneNumber: "+713333333333",
 				},
 			},
-			body: map[string]interface{}{
+			mockUC:    true,
+			mockJWT:   true,
+			errFromUC: nil,
+			reqBody: map[string]interface{}{
 				"login":        "TestLogin",
 				"password":     "!@@@key123",
 				"email":        "test22@gmail.com",
 				"phone_number": "+713333333333",
 			},
 		}, {
-			name:         "nok, invalid request body: wrong type",
-			expectedErr:  delivery.ErrBadRequestBody,
-			errFromUC:    nil,
-			expectedUser: entity.User{},
-			body: map[string]interface{}{
+			name:        "nok, invalid request body: wrong type",
+			expectedErr: delivery.ErrBadRequestBody,
+			errFromUC:   nil,
+			reqBody: map[string]interface{}{
 				"login": 12345,
 			},
 		}, {
-			name:         "nok, get error from usecase: user duplication",
-			expectedErr:  usecase.ErrUserDuplication,
-			errFromUC:    usecase.ErrUserDuplication,
-			mockUC:       true,
-			expectedUser: entity.User{},
-			body: map[string]interface{}{
+			name:        "nok, get error from usecase: user duplication",
+			expectedErr: usecase.ErrUserDuplication,
+			mockUC:      true,
+			errFromUC:   usecase.ErrUserDuplication,
+			reqBody: map[string]interface{}{
 				"login":        "TestLogin",
 				"password":     "!@@@key123",
 				"email":        "test22@gmail.com",
 				"phone_number": "+713333333333",
 			},
 		}, {
-			name:         "nok, get error from usecase: user not found for response",
-			expectedErr:  usecase.ErrNoUser,
-			errFromUC:    usecase.ErrNoUser,
-			mockUC:       true,
-			expectedUser: entity.User{},
-			body: map[string]interface{}{
+			name:        "nok, get error from usecase: user not found for response",
+			expectedErr: usecase.ErrNoUser,
+			mockUC:      true,
+			errFromUC:   usecase.ErrNoUser,
+			reqBody: map[string]interface{}{
 				"login":        "TestLogin",
 				"password":     "!@@@key123",
 				"email":        "test22@gmail.com",
@@ -91,7 +88,7 @@ func TestRegister(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			body, _ := json.Marshal(tc.body)
+			body, _ := json.Marshal(tc.reqBody)
 			req := httptest.NewRequest(http.MethodPost, "/register", bytes.NewReader(body))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
@@ -108,7 +105,7 @@ func TestRegister(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, userToRespBody(tc.expectedUser), actualRespBody(rec))
+			assert.Equal(t, userToRespBody(tc.expectedUser), *actualRespBody(rec))
 		})
 	}
 }
@@ -146,11 +143,15 @@ func newRegisterHandler(uc usecase.ChatUseCase, jwtManager jwt.TokenManager) *Se
 	}
 }
 
-func actualRespBody(r *httptest.ResponseRecorder) userRespBody {
+func actualRespBody(r *httptest.ResponseRecorder) *userRespBody {
 	rBody := userRespBody{}
-	json.NewDecoder(r.Body).Decode(&rBody)
 
-	return rBody
+	err := json.NewDecoder(r.Body).Decode(&rBody)
+	if err != nil {
+		return nil
+	}
+
+	return &rBody
 }
 
 func getEchoContext(r *http.Request, w http.ResponseWriter) echo.Context {
