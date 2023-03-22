@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -101,7 +101,7 @@ func TestRegister(t *testing.T) {
 			err := h.Register(eCtx)
 
 			if err != nil {
-				assert.True(t, errors.Is(err, tc.expectedErr))
+				require.EqualError(t, err, tc.expectedErr.Error())
 				return
 			}
 
