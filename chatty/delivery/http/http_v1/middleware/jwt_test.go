@@ -113,7 +113,7 @@ func initEcho(jwtCfg *config.JWT) *echo.Echo {
 }
 
 func generateToken(JWTCfg config.JWT, user entity.User, isInvalid bool) (string, time.Time) {
-	manager := jwtmanager.NewJWTManager(JWTCfg)
+	manager := jwtmanager.NewTokenManager(JWTCfg)
 
 	token, expAt, _ := manager.GenerateAccessToken(user)
 	if isInvalid {

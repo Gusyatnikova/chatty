@@ -11,6 +11,6 @@ type JWTManager struct {
 	cfg config.JWT
 }
 
-func NewJWTManager(cfg config.JWT) *JWTManager {
+func NewTokenManager(cfg config.JWT) TokenManager {
 	return &JWTManager{cfg: cfg}
 }

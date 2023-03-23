@@ -18,13 +18,13 @@ import (
 
 type ServerHandler struct {
 	uc         usecase.ChatUseCase
-	jwtManager *jwt.JWTManager
+	jwtManager jwt.TokenManager
 }
 
 func NewServerHandler(e *echo.Echo, uc usecase.ChatUseCase, jwtCfg config.JWT) {
 	h := &ServerHandler{
 		uc:         uc,
-		jwtManager: jwt.NewJWTManager(jwtCfg),
+		jwtManager: jwt.NewTokenManager(jwtCfg),
 	}
 
 	e.POST("login", h.Login)
