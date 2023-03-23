@@ -48,7 +48,7 @@ func TestLogin_Positive(t *testing.T) {
 
 	eCtx := getEchoContext(req, rec)
 
-	t.Run("ok, successful registration", func(t *testing.T) {
+	t.Run("ok, successful login", func(t *testing.T) {
 		h := newRegisterHandler(mockLogin(
 			t, eCtx.Request().Context(), true, true, expectedUser, nil))
 
