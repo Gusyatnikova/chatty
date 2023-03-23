@@ -81,6 +81,12 @@ func TestLogin_Negative(t *testing.T) {
 				"login": "TestLogin",
 			},
 		}, {
+			name:        "nok, invalid request body: login don't passed",
+			expectedErr: errors.New("Login: cannot be blank."),
+			reqBody: map[string]interface{}{
+				"password": "!@@@key123",
+			},
+		}, {
 			name:        "nok, get error from usecase: user not found",
 			expectedErr: usecase.ErrNoUser,
 			errFromUC:   usecase.ErrNoUser,
