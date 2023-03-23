@@ -98,7 +98,7 @@ func TestLogin_Negative(t *testing.T) {
 				"phone_number": "+713333333333",
 			},
 		}, {
-			name:        "nok, get error from usecase: wrong password",
+			name:        "nok, get error from usecase: unsuccessful authorization",
 			expectedErr: usecase.ErrUserUnauthorized,
 			errFromUC:   usecase.ErrUserUnauthorized,
 			mockUC:      true,
