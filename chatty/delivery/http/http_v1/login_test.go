@@ -40,17 +40,15 @@ func TestLogin_Positive(t *testing.T) {
 		}
 	)
 
-	t.Run("ok, successful login", func(t *testing.T) {
-		rec, err := Login(t, reqBody, expectedUser, mockData{
-			errUC:   nil,
-			mockUC:  true,
-			mockJWT: true,
-		})
-
-		require.NoError(t, err)
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, userToRespBody(expectedUser), *actualRespBody(rec))
+	rec, err := Login(t, reqBody, expectedUser, mockData{
+		errUC:   nil,
+		mockUC:  true,
+		mockJWT: true,
 	})
+
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, userToRespBody(expectedUser), *actualRespBody(rec))
 }
 
 func TestLogin_Negative(t *testing.T) {
