@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
@@ -47,8 +46,8 @@ func TestLogin_Positive(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, userToRespBody(expectedUser), *actualRespBody(rec))
+	require.Equal(t, http.StatusOK, rec.Code)
+	require.Equal(t, userToRespBody(expectedUser), *actualRespBody(rec))
 }
 
 func TestLogin_Negative(t *testing.T) {
