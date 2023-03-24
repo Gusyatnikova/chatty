@@ -96,7 +96,7 @@ func TestRegister(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			eCtx := getEchoContext(req, rec)
-			h := newRegisterHandler(mockRegister(
+			h := newHandler(mockRegister(
 				t, eCtx.Request().Context(), tc.mockUC, tc.mockJWT, tc.expectedUser, tc.errFromUC))
 
 			err := h.Register(eCtx)
@@ -137,7 +137,7 @@ func mockRegister(t *testing.T, ctx context.Context, mockUC bool, mockJWT bool, 
 	return
 }
 
-func newRegisterHandler(uc usecase.ChatUseCase, jwtManager jwt.TokenManager) *ServerHandler {
+func newHandler(uc usecase.ChatUseCase, jwtManager jwt.TokenManager) *ServerHandler {
 	return &ServerHandler{
 		uc:         uc,
 		jwtManager: jwtManager,
