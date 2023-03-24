@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/stretchr/testify/require"
+
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"chatty/chatty/delivery"
 	"chatty/chatty/entity"
@@ -95,7 +96,7 @@ func TestRegister(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			eCtx := getEchoContext(req, rec)
-			h := newRegisterHandler(prepareMocks(
+			h := newHandler(mockRegister(
 				t, eCtx.Request().Context(), tc.mockUC, tc.mockJWT, tc.expectedUser, tc.errFromUC))
 
 			err := h.Register(eCtx)
@@ -110,7 +111,7 @@ func TestRegister(t *testing.T) {
 	}
 }
 
-func prepareMocks(t *testing.T, ctx context.Context, mockUC bool, mockJWT bool, user entity.User, ucErr error) (
+func mockRegister(t *testing.T, ctx context.Context, mockUC bool, mockJWT bool, user entity.User, ucErr error) (
 	muc usecase.ChatUseCase, mjwt jwt.TokenManager) {
 	if !mockUC && !mockJWT {
 		return nil, nil
@@ -136,7 +137,7 @@ func prepareMocks(t *testing.T, ctx context.Context, mockUC bool, mockJWT bool, 
 	return
 }
 
-func newRegisterHandler(uc usecase.ChatUseCase, jwtManager jwt.TokenManager) *ServerHandler {
+func newHandler(uc usecase.ChatUseCase, jwtManager jwt.TokenManager) *ServerHandler {
 	return &ServerHandler{
 		uc:         uc,
 		jwtManager: jwtManager,
