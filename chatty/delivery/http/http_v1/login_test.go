@@ -38,14 +38,10 @@ func TestLogin_Positive(t *testing.T) {
 			"login":    "TestLogin",
 			"password": "!@@@key123",
 		}
-		body, _ = json.Marshal(reqBody)
 	)
 
-	req := httptest.NewRequest(http.MethodGet, "/login", bytes.NewReader(body))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 	t.Run("ok, successful login", func(t *testing.T) {
-		rec, err := Login(t, req, expectedUser, mockData{
+		rec, err := Login(t, reqBody, expectedUser, mockData{
 			errUC:   nil,
 			mockUC:  true,
 			mockJWT: true,
@@ -108,11 +104,7 @@ func TestLogin_Negative(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			body, _ := json.Marshal(tt.reqBody)
-			req := httptest.NewRequest(http.MethodGet, "/login", bytes.NewReader(body))
-			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-			rec, err := Login(t, req, entity.User{}, mockData{
+			rec, err := Login(t, tt.reqBody, entity.User{}, mockData{
 				errUC:   tt.errFromUC,
 				mockUC:  tt.mockUC,
 				mockJWT: false,
@@ -130,7 +122,11 @@ type mockData struct {
 	mockJWT bool
 }
 
-func Login(t *testing.T, r *http.Request, user entity.User, md mockData) (*httptest.ResponseRecorder, error) {
+func Login(t *testing.T, rb map[string]interface{}, user entity.User, md mockData) (*httptest.ResponseRecorder, error) {
+	body, _ := json.Marshal(rb)
+	r := httptest.NewRequest(http.MethodGet, "/login", bytes.NewReader(body))
+	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	rec := httptest.NewRecorder()
 	eCtx := getEchoContext(r, rec)
 
