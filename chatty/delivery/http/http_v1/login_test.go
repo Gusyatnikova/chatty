@@ -44,15 +44,12 @@ func TestLogin_Positive(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/login", bytes.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-	rec := httptest.NewRecorder()
-
-	eCtx := getEchoContext(req, rec)
-
 	t.Run("ok, successful login", func(t *testing.T) {
-		h := newRegisterHandler(mockLogin(
-			t, eCtx.Request().Context(), true, true, expectedUser, nil))
-
-		err := h.Login(eCtx)
+		rec, err := Login(t, req, expectedUser, mockData{
+			errUC:   nil,
+			mockUC:  true,
+			mockJWT: true,
+		})
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -115,14 +112,11 @@ func TestLogin_Negative(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/login", bytes.NewReader(body))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-			rec := httptest.NewRecorder()
-
-			eCtx := getEchoContext(req, rec)
-
-			h := newRegisterHandler(mockLogin(
-				t, eCtx.Request().Context(), tt.mockUC, false, entity.User{}, tt.errFromUC))
-
-			err := h.Login(eCtx)
+			rec, err := Login(t, req, entity.User{}, mockData{
+				errUC:   tt.errFromUC,
+				mockUC:  tt.mockUC,
+				mockJWT: false,
+			})
 
 			require.EqualError(t, err, tt.expectedErr.Error())
 			require.Nil(t, actualRespBody(rec))
@@ -130,8 +124,23 @@ func TestLogin_Negative(t *testing.T) {
 	}
 }
 
-func mockLogin(t *testing.T, ctx context.Context, mockUC bool, mockJWT bool, user entity.User, ucErr error) (
-	muc usecase.ChatUseCase, mjwt jwt.TokenManager) {
+type mockData struct {
+	errUC   error
+	mockUC  bool
+	mockJWT bool
+}
+
+func Login(t *testing.T, r *http.Request, user entity.User, md mockData) (*httptest.ResponseRecorder, error) {
+	rec := httptest.NewRecorder()
+	eCtx := getEchoContext(r, rec)
+
+	h := newHandler(mockLogin(t, eCtx.Request().Context(), user, md.mockJWT, md.mockUC, md.errUC))
+
+	return rec, h.Login(eCtx)
+}
+
+func mockLogin(t *testing.T, ctx context.Context, user entity.User, mockJWT bool, mockUC bool, ucErr error) (
+	muc usecase.ChatUseCase, tm jwt.TokenManager) {
 	if !mockUC && !mockJWT {
 		return nil, nil
 	}
@@ -150,7 +159,7 @@ func mockLogin(t *testing.T, ctx context.Context, mockUC bool, mockJWT bool, use
 	if mockJWT {
 		jwtManager := jwtmocks.NewTokenManager(t)
 		jwtManager.On("GenerateAccessToken", mock.Anything).Return("", time.Now(), nil)
-		mjwt = jwtManager
+		tm = jwtManager
 	}
 
 	return
