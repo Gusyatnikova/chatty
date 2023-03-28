@@ -121,7 +121,7 @@ type mockData struct {
 
 func Login(t *testing.T, rb map[string]interface{}, user entity.User, md mockData) (*httptest.ResponseRecorder, error) {
 	body, _ := json.Marshal(rb)
-	r := httptest.NewRequest(http.MethodGet, "/login", bytes.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(body))
 	r.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	rec := httptest.NewRecorder()
