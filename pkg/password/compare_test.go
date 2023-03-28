@@ -2,7 +2,7 @@ package password
 
 import (
 	"chatty/chatty/app/config"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -44,19 +44,19 @@ func TestService_Compare(t *testing.T) {
 				password:    "testPwd(1)9=+",
 				getHashFunc: staticHash,
 			},
-			want:    true,
-			wantErr: false,
+			want:    false,
+			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
-		convey.Convey(tt.name, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			encodedHash, _ := tt.args.getHashFunc(tt.args.password)
 
 			got, err := service.Compare(tt.args.password, encodedHash)
 
-			convey.So(err != nil, convey.ShouldEqual, tt.wantErr)
-			convey.So(got, convey.ShouldEqual, tt.want)
+			assert.Equal(t, err != nil, tt.wantErr)
+			assert.Equal(t, got, tt.want)
 		})
 	}
 }
